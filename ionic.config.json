@@ -1,0 +1,7 @@
+{
+  "name": "munchrise",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

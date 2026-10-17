@@ -1,0 +1,114 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Overview</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack">
+    <div class="kpi-grid">
+      <div class="kpi kpi--brand">
+        <span class="kpi__label">Revenue</span>
+        <span class="kpi__value num">{{ revenue() | peso }}</span>
+      </div>
+      <a class="kpi" routerLink="/admin/orders">
+        <span class="kpi__label">Orders</span>
+        <span class="kpi__value num">{{ orderCount() }}</span>
+        <span class="kpi__hint">{{ pendingCount() }} in progress</span>
+      </a>
+      <a class="kpi" routerLink="/admin/products">
+        <span class="kpi__label">Products</span>
+        <span class="kpi__value num">{{ stock().total }}</span>
+      </a>
+      <a class="kpi" routerLink="/admin/inventory">
+        <span class="kpi__label">Need restock</span>
+        <span class="kpi__value num">{{ stock().low.length + stock().out.length }}</span>
+        <span class="kpi__hint">{{ stock().out.length }} out of stock</span>
+      </a>
+    </div>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Stock alerts</h2>
+        <a class="section-link" routerLink="/admin/inventory">Restock</a>
+      </div>
+      @if (alerts().length === 0) {
+        <p class="muted">Everything is well stocked.</p>
+      } @else {
+        <ul class="plain-list">
+          @for (product of alerts(); track product.id) {
+            <li class="plain-row">
+              <span class="plain-row__name">{{ product.name }}</span>
+              @if (product.stock === 0) {
+                <span class="pill pill--danger">Out of stock</span>
+              } @else {
+                <span class="pill pill--warning">{{ product.stock }} left</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Best sellers</h2>
+      </div>
+      @if (topSellers().length === 0) {
+        <p class="muted">Sales will show up here after the first orders.</p>
+      } @else {
+        <ul class="plain-list">
+          @for (item of topSellers(); track item.name) {
+            <li class="bar-row">
+              <div class="bar-row__top">
+                <span class="plain-row__name">{{ item.name }}</span>
+                <span class="num muted">{{ item.qty }} sold</span>
+              </div>
+              <div class="bar" aria-hidden="true">
+                <span class="bar__fill" [style.width.%]="(item.qty / maxQty()) * 100"></span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Latest orders</h2>
+        <a class="section-link" routerLink="/admin/orders">See all</a>
+      </div>
+      @if (recentOrders().length === 0) {
+        <p class="muted">No orders yet.</p>
+      } @else {
+        <ul class="plain-list">
+          @for (order of recentOrders(); track order.id) {
+            <li class="plain-row">
+              <span class="plain-row__name">{{ order.id }} · {{ order.shipping.fullName }}</span>
+              <span class="num">{{ order.total | peso }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <a class="card link-card" routerLink="/admin/reviews">
+      <ion-icon name="chatbubble-ellipses-outline" aria-hidden="true"></ion-icon>
+      <span>{{ reviewCount() }} customer reviews</span>
+      <ion-icon name="arrow-forward" aria-hidden="true" class="link-card__go"></ion-icon>
+    </a>
+
+    <a class="card link-card" routerLink="/admin/users">
+      <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+      <span>Staff &amp; roles</span>
+      <ion-icon name="arrow-forward" aria-hidden="true" class="link-card__go"></ion-icon>
+    </a>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <app-role-tab-bar role="admin" />
+</ion-footer>

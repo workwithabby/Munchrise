@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="backHref()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--narrow stack">
+    <section class="card">
+      <ul class="row-list">
+        <li class="row-item">
+          <span class="icon-circle" aria-hidden="true"><ion-icon name="person-circle-outline"></ion-icon></span>
+          <div class="row-item__main">
+            <p class="row-item__title">{{ auth.displayName() }}</p>
+            <p class="row-item__meta">{{ auth.user()?.email || 'Not signed in to an account' }}</p>
+          </div>
+          <span class="pill">{{ roleLabel() }}</span>
+        </li>
+      </ul>
+    </section>
+
+    @if (links().length > 0) {
+      <section class="card">
+        <h2 class="section-title">Shortcuts</h2>
+        <ion-list lines="none">
+          @for (link of links(); track link.url) {
+            <ion-item [routerLink]="link.url" routerDirection="forward" detail="true">
+              <ion-icon slot="start" [name]="link.icon" aria-hidden="true"></ion-icon>
+              <ion-label>{{ link.label }}</ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      </section>
+    }
+
+    @if (auth.isLoggedIn()) {
+      <section class="card form-stack">
+        <h2 class="section-title">Change password</h2>
+        <ion-input class="field" fill="outline" type="password" label="Current password" labelPlacement="floating"
+          autocomplete="current-password" [value]="current()" (ionInput)="current.set($event.detail.value ?? '')">
+          <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+        </ion-input>
+        <ion-input class="field" fill="outline" type="password" label="New password" labelPlacement="floating"
+          autocomplete="new-password" helperText="At least 8 characters"
+          [value]="next()" (ionInput)="next.set($event.detail.value ?? '')">
+          <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+        </ion-input>
+        <ion-input class="field" fill="outline" type="password" label="Confirm new password" labelPlacement="floating"
+          autocomplete="new-password" [value]="confirm()" (ionInput)="confirm.set($event.detail.value ?? '')">
+          <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+        </ion-input>
+
+        @if (error()) {
+          <p class="form-error" role="alert">
+            <ion-icon name="alert-circle" aria-hidden="true"></ion-icon> {{ error() }}
+          </p>
+        }
+        <ion-button expand="block" [disabled]="saving()" (click)="changePassword()">
+          {{ saving() ? 'Saving…' : 'Update password' }}
+        </ion-button>
+      </section>
+
+      <ion-button expand="block" fill="outline" color="danger" (click)="logout()">
+        <ion-icon slot="start" name="log-out-outline" aria-hidden="true"></ion-icon>
+        Log out
+      </ion-button>
+    } @else {
+      <section class="card">
+        <p class="muted">You are browsing as a guest. Log in or sign up to manage your account and password.</p>
+        <ion-button expand="block" routerLink="/login" routerDirection="forward">Login / Sign up</ion-button>
+      </section>
+    }
+  </div>
+</ion-content>

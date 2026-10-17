@@ -1,0 +1,113 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title class="nav-title">
+      <span class="nav-brand">Munch<span>rise</span></span>
+    </ion-title>
+    <span slot="end" class="nav-page">Sign up</span>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollY]="false">
+  <div class="page page--narrow stack auth-fit">
+    <div class="brand-block">
+      <img class="brand-logo" src="assets/logo/munchrise-logo.png" alt="Munchrise" width="200" height="120" />
+      <h1>Join Munchrise</h1>
+      <p class="muted">Make every morning tastier.</p>
+    </div>
+
+    <form class="form-stack" (submit)="$event.preventDefault(); signUp()">
+      <div class="form-grid-2">
+        <ion-input
+          class="field"
+          fill="outline"
+          label="First name"
+          labelPlacement="floating"
+          autocomplete="given-name"
+          [value]="firstName()"
+          (ionInput)="firstName.set($event.detail.value ?? '')">
+        </ion-input>
+
+        <ion-input
+          class="field"
+          fill="outline"
+          label="Surname"
+          labelPlacement="floating"
+          autocomplete="family-name"
+          [value]="lastName()"
+          (ionInput)="lastName.set($event.detail.value ?? '')">
+        </ion-input>
+      </div>
+
+      <ion-input
+        class="field"
+        fill="outline"
+        label="Email"
+        labelPlacement="floating"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        [value]="email()"
+        (ionInput)="email.set($event.detail.value ?? '')">
+      </ion-input>
+
+      <ion-input
+        class="field"
+        fill="outline"
+        label="Password"
+        labelPlacement="floating"
+        type="password"
+        autocomplete="new-password"
+        helperText="At least 8 characters"
+        [value]="password()"
+        (ionInput)="password.set($event.detail.value ?? '')">
+        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+      </ion-input>
+
+      <ion-input
+        class="field"
+        fill="outline"
+        label="Confirm password"
+        labelPlacement="floating"
+        type="password"
+        autocomplete="new-password"
+        [value]="confirmPassword()"
+        (ionInput)="confirmPassword.set($event.detail.value ?? '')">
+        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+      </ion-input>
+
+      @if (formError()) {
+        <p class="form-error" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true"></ion-icon>
+          {{ formError() }}
+        </p>
+      }
+
+      <ion-button expand="block" type="submit" [disabled]="busy()">
+        @if (busy()) {
+          <ion-spinner name="crescent" slot="start"></ion-spinner>
+          Creating your account…
+        } @else {
+          Create account
+        }
+      </ion-button>
+    </form>
+
+    <ion-button expand="block" fill="clear" color="dark" routerLink="/login">
+      I already have an account
+    </ion-button>
+
+    <div class="divider"><span>or</span></div>
+
+    <ion-button expand="block" fill="outline" (click)="continueAsGuest()">
+      Continue as Guest
+    </ion-button>
+
+    <p class="callout">
+      <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+      We'll email you a 6-digit code to confirm your email address.
+    </p>
+  </div>
+</ion-content>

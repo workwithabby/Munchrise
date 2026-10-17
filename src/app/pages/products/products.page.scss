@@ -1,0 +1,63 @@
+/* Products — shared blocks come from global.scss */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.search-row ion-searchbar {
+  flex: 1;
+}
+
+.filter-toggle {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  border-color: var(--color-border-strong);
+}
+
+.filter-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--munch-orange);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.filters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.filter-label {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  color: var(--munch-brown);
+}
+
+.filter-label span {
+  font-weight: 700;
+  color: var(--munch-orange);
+}
+
+ion-range {
+  --bar-background: var(--color-border);
+  --bar-background-active: var(--munch-orange);
+  --knob-background: var(--munch-orange);
+  --knob-size: 22px;
+  padding: 0 var(--space-2);
+}

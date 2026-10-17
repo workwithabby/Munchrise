@@ -1,0 +1,181 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="brand-title">Munch<span>rise</span></ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+      <app-cart-button />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide page--tabs">
+    <!-- Hero banner -->
+    <section class="hero" aria-labelledby="home-greeting">
+      <svg class="hero__sun" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+        <circle cx="100" cy="100" r="46" fill="#DCA93E" />
+        <circle cx="100" cy="100" r="70" stroke="#FFF4DC" stroke-opacity=".35" stroke-width="2" />
+        <circle cx="100" cy="100" r="92" stroke="#FFF4DC" stroke-opacity=".2" stroke-width="2" />
+        <g stroke="#FFF4DC" stroke-opacity=".5" stroke-width="3" stroke-linecap="round">
+          <path d="M100 18v14M100 168v14M18 100h14M168 100h14M42 42l10 10M148 148l10 10M158 42l-10 10M52 148l-10 10" />
+        </g>
+      </svg>
+      <span class="hero__eyebrow">Rise, Munch, Repeat!</span>
+      <h1 id="home-greeting" class="hero__title">{{ greeting() }}</h1>
+      <p class="hero__text">Fresh breakfast, delivered right as your day begins.</p>
+      <div class="hero__actions">
+        <a class="hero__cta" routerLink="/products">
+          Order breakfast
+          <ion-icon name="arrow-forward" aria-hidden="true"></ion-icon>
+        </a>
+        <span class="hero__perk">
+          <ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon>
+          Free delivery over ₱{{ freeDeliveryMin }}
+        </span>
+      </div>
+    </section>
+
+    @if (activeOrder(); as active) {
+      <a class="card active-order" [routerLink]="['/track', active.id]">
+        <span class="icon-circle" aria-hidden="true"><ion-icon name="bicycle-outline"></ion-icon></span>
+        <span class="active-order__text">
+          <strong>{{ active.status === 'Out for Delivery' ? 'Your order is on the way' : 'Order ' + active.status.toLowerCase() }}</strong>
+          <span>{{ active.id }} · tap to track</span>
+        </span>
+        <app-order-progress class="active-order__bar" [status]="active.status" />
+      </a>
+    }
+
+    <!-- Search jumps to the Menu, which has the filters -->
+    <ion-searchbar
+      class="search home-search"
+      placeholder="What are you craving?"
+      enterkeyhint="search"
+      showCancelButton="never"
+      (ionInput)="onSearchInput($event)"
+      (keyup.enter)="search()">
+    </ion-searchbar>
+    <!-- Categories: tap one to open the Menu already filtered -->
+    <div class="chip-row cat-chips" role="group" aria-label="Browse by category">
+      @for (tile of categoryTiles(); track tile.name) {
+        <button type="button" class="cat-chip" (click)="openCategory(tile.name)">
+          <span class="cat-chip__icon" [style.background]="tile.gradient" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" [innerHTML]="tile.icon"></svg>
+          </span>
+          <span class="cat-chip__name">{{ tile.name }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- Pick of the day -->
+    @if (pickOfTheDay(); as pick) {
+      <a class="card pick" [routerLink]="['/product', pick.id]">
+        <app-product-image class="pick__img" [src]="pick.image" [name]="pick.name" [category]="pick.category" />
+        <span class="pick__body">
+          <span class="pick__tag"><ion-icon name="sparkles-outline" aria-hidden="true"></ion-icon> Pick of the day</span>
+          <strong class="pick__name">{{ pick.name }}</strong>
+          <span class="pick__desc">{{ pick.description }}</span>
+          <span class="pick__price num">{{ pick.price | peso }}</span>
+        </span>
+      </a>
+    }
+
+    <!-- Deals -->
+    <section class="section">
+      <div class="section-head"><h2 class="section-title">Deals for you</h2></div>
+      <div class="promo-row" appDragScroll>
+        @for (promo of promos(); track promo.code ?? promo.title) {
+          <button type="button" class="promo" [class]="'promo promo--' + promo.tone" [disabled]="!promo.code" (click)="copyCode(promo.code)">
+            <span class="promo__icon" aria-hidden="true"><ion-icon [name]="promo.icon"></ion-icon></span>
+            <span class="promo__title">{{ promo.title }}</span>
+            <span class="promo__text">{{ promo.text }}</span>
+            @if (promo.code) {
+              <span class="promo__code"><ion-icon name="copy-outline" aria-hidden="true"></ion-icon> {{ promo.code }}</span>
+            }
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- Best sellers -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">Best sellers</h2>
+        <a class="section-link" routerLink="/products">See all</a>
+      </div>
+      <div class="best-row" appDragScroll>
+        @for (product of bestSellers(); track product.id) {
+          <app-product-card [product]="product" variant="tile" />
+        }
+      </div>
+    </section>
+
+    <!-- Order again (members with past orders) -->
+    @if (orderAgain().length > 0) {
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title">Order again</h2>
+          <a class="section-link" routerLink="/orders">History</a>
+        </div>
+        <ul class="row-list again">
+          @for (order of orderAgain(); track order.id) {
+            <li class="card again__item">
+              <span class="icon-circle" aria-hidden="true"><ion-icon name="repeat-outline"></ion-icon></span>
+              <span class="again__text">
+                <strong>{{ order.id }}</strong>
+                <span>{{ orderSummary(order) }}</span>
+              </span>
+              <ion-button size="small" fill="outline" (click)="reorder(order)">Reorder</ion-button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <!-- Top rated -->
+    @if (topRated().length > 0) {
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title">Top rated</h2>
+          <a class="section-link" routerLink="/products">See all</a>
+        </div>
+        <div class="best-row" appDragScroll>
+          @for (product of topRated(); track product.id) {
+            <app-product-card [product]="product" variant="tile" />
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Rewards (members) or a sign-up nudge (guests) -->
+    <section class="section">
+      @if (auth.isUser()) {
+        <a class="card rewards" routerLink="/rewards">
+          <span class="rewards__top">
+            <span class="icon-circle icon-circle--warning" aria-hidden="true"><ion-icon name="gift-outline"></ion-icon></span>
+            <span class="rewards__text">
+              <strong class="num">{{ rewards.points() }} points</strong>
+              <span>{{ pointsToNext() > 0 ? pointsToNext() + ' more for your next reward' : 'You can get a reward now!' }}</span>
+            </span>
+            <ion-icon name="arrow-forward" aria-hidden="true"></ion-icon>
+          </span>
+          <span class="rewards__bar" role="progressbar" aria-label="Progress to next reward" [attr.aria-valuenow]="rewards.progress()" aria-valuemin="0" aria-valuemax="100">
+            <span class="rewards__fill" [style.width.%]="rewards.progress()"></span>
+          </span>
+        </a>
+      } @else {
+        <div class="card join">
+          <h2 class="section-title">Join Munchrise</h2>
+          <p>Create a free account to order, earn reward points and track your delivery.</p>
+          <div class="join__actions">
+            <ion-button routerLink="/signup">Sign up</ion-button>
+            <ion-button fill="outline" routerLink="/login">Log in</ion-button>
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+</ion-content>

@@ -1,0 +1,74 @@
+.count {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-orange-tint);
+  font-size: var(--text-sm);
+  color: var(--munch-brown);
+}
+
+.promo-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.promo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  transition: opacity var(--dur-base) var(--ease);
+}
+
+.promo.is-off {
+  opacity: 0.6;
+}
+
+.promo__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.promo__code {
+  display: inline-block;
+  padding: 3px 12px;
+  border: 1.5px dashed var(--munch-orange);
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--munch-orange);
+}
+
+.promo__desc {
+  margin: var(--space-2) 0 2px;
+  font-weight: 600;
+  color: var(--munch-brown);
+}
+
+.promo__main .row-item__meta {
+  margin: 0;
+}
+
+.promo__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.promo__actions ion-toggle {
+  --track-background-checked: var(--color-success);
+}

@@ -1,0 +1,208 @@
+/* Checkout — numbered steps; fields, rows and totals come from global.scss */
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.step-head .section-title {
+  margin: 0;
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--munch-brown);
+  color: var(--munch-white);
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+/* Payment rows: icon + label + radio; selected row gets the brand border */
+.option-list ion-icon {
+  margin-inline-end: var(--space-3);
+  font-size: var(--icon-md);
+  color: var(--color-muted-text);
+}
+
+.option-list ion-item.is-selected {
+  --border-color: var(--munch-orange);
+  --background: var(--color-orange-tint);
+}
+
+.option-list ion-item.is-selected ion-icon {
+  color: var(--munch-orange);
+}
+
+.card-form {
+  margin-top: var(--space-4);
+}
+
+/* Promo: field + button on one line */
+.promo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.promo-row ion-input {
+  flex: 1;
+}
+
+.promo-row ion-button {
+  min-height: 56px;
+}
+
+.promo-message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
+.promo-message.ok {
+  color: var(--color-success);
+}
+
+.voucher {
+  --background: var(--surface-muted);
+  --border-radius: var(--radius-md);
+  --padding-start: var(--space-3);
+  --inner-padding-end: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.voucher ion-checkbox {
+  width: 100%;
+}
+
+.voucher-label {
+  display: block;
+  font-weight: 700;
+  white-space: normal;
+}
+
+.voucher-hint {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+  white-space: normal;
+}
+
+.totals {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ---- Simulated payment overlay ---- */
+.pay-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  animation: pay-fade 200ms ease-out;
+}
+
+.pay-box {
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+
+  h2 {
+    margin: 16px 0 4px;
+    font-size: 1.15rem;
+  }
+}
+
+.pay-spinner {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 5px solid rgba(220, 169, 62, 0.25);
+  border-top-color: var(--munch-orange, #c8481a);
+  animation: pay-spin 800ms linear infinite;
+}
+
+.pay-check {
+  width: 76px;
+  height: 76px;
+  display: block;
+  margin: 0 auto;
+
+  &__circle {
+    stroke: #2e9d5b;
+    stroke-width: 3;
+    stroke-dasharray: 151;
+    stroke-dashoffset: 151;
+    animation: pay-draw 600ms ease-out forwards;
+  }
+
+  &__tick {
+    stroke: #2e9d5b;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: pay-draw 400ms ease-out 500ms forwards;
+  }
+}
+
+.pay-receipt {
+  margin-top: 16px;
+  padding: 18px 16px 8px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px dashed rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  transform-origin: top center;
+  animation: pay-receipt-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 700ms both;
+
+  &__amount {
+    margin: 0 0 10px;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    font-size: 0.88rem;
+  }
+}
+
+.pay-note {
+  margin-top: 14px;
+  font-size: 0.85rem;
+}
+
+@keyframes pay-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pay-spin { to { transform: rotate(360deg); } }
+@keyframes pay-draw { to { stroke-dashoffset: 0; } }
+@keyframes pay-receipt-in {
+  from { opacity: 0; transform: translateY(-24px) scaleY(0.2); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pay-spinner, .pay-check__circle, .pay-check__tick, .pay-receipt { animation-duration: 1ms; animation-delay: 0s; }
+}

@@ -1,0 +1,135 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Order Confirmation</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    @if (order(); as order) {
+      <!-- Success banner -->
+      <div class="success">
+        <span class="icon-circle icon-circle--lg icon-circle--success" aria-hidden="true">
+          <ion-icon name="checkmark"></ion-icon>
+        </span>
+        <h1>Order placed!</h1>
+        <p class="muted">Rise, munch, repeat — we are preparing it now.</p>
+      </div>
+
+      <!-- Receipt -->
+      <section class="card receipt">
+        <div class="receipt-head">
+          <div>
+            <p class="eyebrow">Order number</p>
+            <p class="order-number">{{ order.id }}</p>
+            <p class="row-item__meta">{{ order.placedAt | date: 'MMM d, y · h:mm a' }}</p>
+          </div>
+          <span class="pill status-pill" [attr.data-status]="order.status">{{ order.status }}</span>
+        </div>
+
+        <ul class="row-list items">
+          @for (line of order.items; track line.productId) {
+            <li class="row-item">
+              <app-product-image class="thumb thumb--sm" [src]="imageFor(line)" [name]="line.name" [category]="categoryFor(line)" />
+              <div class="row-item__main">
+                <p class="row-item__title">{{ line.name }}</p>
+                <p class="row-item__meta">{{ line.quantity }} × {{ line.price | peso }}</p>
+              </div>
+              <span class="row-item__value">{{ line.price * line.quantity | peso }}</span>
+            </li>
+          }
+        </ul>
+
+        <div class="summary totals">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{ order.subtotal | peso }}</span>
+          </div>
+
+          @if (order.discount > 0) {
+            <div class="summary-row summary-row--discount">
+              <span>Discount{{ order.promoCode ? ' (' + order.promoCode + ')' : '' }}</span>
+              <span>-{{ order.discount | peso }}</span>
+            </div>
+          }
+
+          <div class="summary-row">
+            <span>Delivery fee</span>
+            @if (order.deliveryFee === 0) {
+              <span class="text-success">FREE</span>
+            } @else {
+              <span>{{ order.deliveryFee | peso }}</span>
+            }
+          </div>
+
+          <div class="summary-row summary-row--total">
+            <span>Total</span>
+            <span>{{ order.total | peso }}</span>
+          </div>
+        </div>
+
+        <p class="callout callout--success points">
+          <ion-icon name="star" aria-hidden="true"></ion-icon>
+          +{{ order.pointsEarned }} reward points earned
+        </p>
+      </section>
+
+      <!-- Payment receipt (GCash / card) -->
+      @if (order.paymentRef) {
+        <section class="card pay-receipt">
+          <p class="eyebrow">Payment receipt</p>
+          <p class="order-number">{{ order.total | peso }} <span class="text-success">PAID</span></p>
+          <ul class="row-list">
+            <li class="row-item"><div class="row-item__main"><p class="row-item__meta">Paid with</p><p class="row-item__title">{{ order.payment }}</p></div></li>
+            <li class="row-item"><div class="row-item__main"><p class="row-item__meta">Reference</p><p class="row-item__title">{{ order.paymentRef }}</p></div></li>
+            @if (order.paidAt) {
+              <li class="row-item"><div class="row-item__main"><p class="row-item__meta">Paid on</p><p class="row-item__title">{{ order.paidAt | date: 'MMM d, y · h:mm a' }}</p></div></li>
+            }
+          </ul>
+        </section>
+      }
+
+      <!-- Delivery / payment -->
+      <section class="card">
+        <ul class="row-list">
+          <li class="row-item">
+            <span class="icon-circle" aria-hidden="true"><ion-icon name="wallet-outline"></ion-icon></span>
+            <div class="row-item__main">
+              <p class="row-item__meta">Payment</p>
+              <p class="row-item__title">{{ order.payment }} · {{ order.payment === 'Cash on Delivery' ? 'Pay the rider in cash' : 'Paid' }}</p>
+            </div>
+          </li>
+          <li class="row-item">
+            <span class="icon-circle" aria-hidden="true"><ion-icon name="location-outline"></ion-icon></span>
+            <div class="row-item__main">
+              <p class="row-item__meta">Deliver to</p>
+              <p class="row-item__title">{{ order.shipping.fullName }}</p>
+              <p class="row-item__meta">
+                {{ order.shipping.address }}, {{ order.shipping.city }} · {{ order.shipping.phone }}
+              </p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <div class="btn-stack">
+        <ion-button expand="block" [routerLink]="['/track', order.id]" routerDirection="forward">
+          <ion-icon slot="start" name="bicycle-outline" aria-hidden="true"></ion-icon>
+          Track my order
+        </ion-button>
+        <ion-button expand="block" fill="outline" routerLink="/orders" routerDirection="forward">View my orders</ion-button>
+        <ion-button expand="block" fill="clear" color="dark" routerLink="/home" routerDirection="forward">Back to Home</ion-button>
+      </div>
+    } @else {
+      <app-empty-state
+        icon="receipt-outline"
+        title="Order not found"
+        text="We could not find that order number.">
+        <ion-button routerLink="/orders" routerDirection="forward">Go to order history</ion-button>
+      </app-empty-state>
+    }
+  </div>
+</ion-content>

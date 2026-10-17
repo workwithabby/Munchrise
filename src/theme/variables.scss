@@ -1,2 +1,171 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+/* ----------------------------------------------------------------------------
+   Munchrise theme — tokens come from DESIGN_SYSTEM.md (ui-ux-pro-max skill).
+   Everything is plain CSS variables so any Ionic component can use them
+   (--ion-color-primary, etc.). Brand colors stay exactly as the brief.
+   Typography: Calistoga display headings + Inter body (2026 "real food brand").
+   ---------------------------------------------------------------------------- */
+
+:root {
+  /* --- Brand colors (fixed by the brief) --- */
+  --munch-mustard: #dca93e;
+  --munch-orange: #c8481a;
+  --munch-teal: #2b8089;
+  --munch-cream: #fff4dc;
+  --munch-brown: #4a2c17;
+  --munch-white: #ffffff;
+
+  /* One yellow only: stars / highlights use the brand mustard */
+  --munch-yellow: #dca93e;
+
+  /* --- Semantic colors (contrast-checked, see DESIGN_SYSTEM.md §1) --- */
+  --color-success: #1e7a46;
+  --color-success-bg: #e4f4ea;
+  --color-danger: #c81e1e;
+  --color-danger-bg: #fde7e7;
+  --color-warning: #b45309;
+  --color-warning-bg: #fdf0dc;
+  --color-muted-text: #7a5c43; /* 6.1:1 on white — replaces faded opacity text */
+  --color-disabled-bg: #efe3d3;
+  --color-disabled-text: #8f7a67;
+  --color-border: #efe2cd;
+  --color-border-strong: #e3d2b8; /* dashed dividers, input outlines */
+  --color-teal-ink: #1f646b; /* teal text on tinted backgrounds (7.4:1) */
+  --color-amber-ink: #92400e; /* amber text on tinted backgrounds */
+  --color-orange-tint: #fff6f1; /* selected/unread orange wash */
+
+  /* --- Gradient stops --- */
+  --grad-hero-start: #c8481a;
+  --grad-hero-end: #a93a12;
+  --grad-menu-start: #e3b551;
+  --grad-menu-end: #dca93e;
+
+  /* --- Radius scale --- */
+  --munch-radius: 18px; /* cards */
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --munch-radius-lg: 24px;
+
+  /* --- Warm, soft shadows (never pure black) — layered 2026 depth --- */
+  --shadow-sm: 0 1px 2px rgba(74, 44, 23, 0.05), 0 2px 8px rgba(74, 44, 23, 0.04);
+  --shadow-md: 0 4px 12px rgba(74, 44, 23, 0.07), 0 8px 24px rgba(74, 44, 23, 0.06);
+  --shadow-lg: 0 8px 20px rgba(74, 44, 23, 0.1), 0 16px 40px rgba(74, 44, 23, 0.1);
+  --shadow-press: 0 2px 6px rgba(74, 44, 23, 0.1);
+  --munch-shadow: var(--shadow-md); /* legacy name used across pages */
+
+  /* --- Typography (Calistoga display + Inter body) --- */
+  --munch-font-heading: 'Calistoga', Georgia, serif;
+  --munch-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Type scale — every screen uses these, never ad-hoc sizes */
+  --text-xs: 12px;   /* tags, badges */
+  --text-sm: 14px;   /* meta, hints, captions */
+  --text-md: 15px;   /* body */
+  --text-lg: 18px;   /* section titles, totals */
+  --text-xl: 22px;   /* card heroes */
+  --text-2xl: 26px;  /* page titles */
+  --text-3xl: 40px;  /* big numbers (points) */
+
+  /* --- Spacing: 4/8 rhythm --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* --- Icon sizes --- */
+  --icon-sm: 18px;
+  --icon-md: 22px;
+  --icon-lg: 28px;
+
+  /* --- Surfaces --- */
+  --surface: #ffffff;
+  --surface-muted: #fff9ee; /* soft tint inside white cards */
+
+  /* --- Motion (one canonical set for micro-interactions) --- */
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Legacy aliases kept so existing --motion-* rules keep working */
+  --motion-fast: var(--dur-fast);
+  --motion-base: var(--dur-base);
+  --motion-slow: var(--dur-slow);
+  --motion-ease: var(--ease);
+
+  /* --- Layout --- */
+  --gutter: 16px;
+  --tab-bar-height: 58px;
+
+  /* --- Ionic color mapping --- */
+  /* primary -> orange */
+  --ion-color-primary: #c8481a;
+  --ion-color-primary-rgb: 200, 72, 26;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #b44117;
+  --ion-color-primary-tint: #ce5a31;
+
+  /* secondary -> teal */
+  --ion-color-secondary: #2b8089;
+  --ion-color-secondary-rgb: 43, 128, 137;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #27737b;
+  --ion-color-secondary-tint: #408d95;
+
+  /* tertiary -> mustard (brown text on mustard = 5.9:1, never white) */
+  --ion-color-tertiary: #dca93e;
+  --ion-color-tertiary-rgb: 220, 169, 62;
+  --ion-color-tertiary-contrast: #4a2c17;
+  --ion-color-tertiary-contrast-rgb: 74, 44, 23;
+  --ion-color-tertiary-shade: #c69838;
+  --ion-color-tertiary-tint: #e0b251;
+
+  /* success -> deep green (5.4:1 with white) */
+  --ion-color-success: #1e7a46;
+  --ion-color-success-rgb: 30, 122, 70;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #1a6b3e;
+  --ion-color-success-tint: #388759;
+
+  /* warning -> burnt amber (white text passes AA) */
+  --ion-color-warning: #b45309;
+  --ion-color-warning-rgb: 180, 83, 9;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade: #9f4908;
+  --ion-color-warning-tint: #c06525;
+
+  /* danger -> slightly deeper red */
+  --ion-color-danger: #c81e1e;
+  --ion-color-danger-rgb: 200, 30, 30;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #b01a1a;
+  --ion-color-danger-tint: #ce3434;
+
+  /* page background + text */
+  --ion-background-color: #ffffff;
+  --ion-text-color: var(--munch-brown);
+  --ion-item-background: var(--munch-white);
+  --ion-card-background: var(--munch-white);
+  --ion-toolbar-background: #ffffff;
+  --ion-tab-bar-background: rgba(255, 255, 255, 0.97);
+  --ion-border-color: var(--color-border);
+  --ion-font-family: var(--munch-font-body);
+}
+
+/* Make sure our font wins over the Ionic default on every platform/theme. */
+html,
+html.md,
+html.ios {
+  --ion-default-font: var(--munch-font-body);
+  --ion-font-family: var(--munch-font-body);
+}

@@ -1,0 +1,43 @@
+/* Pill stepper: [ - 2 + ] — one shape in Cart and Product details */
+.qty-picker {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--munch-orange);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.step:active:not(:disabled) {
+  background: rgba(200, 72, 26, 0.1);
+}
+
+.step:disabled {
+  color: var(--color-disabled-text);
+  cursor: default;
+}
+
+.qty-value {
+  min-width: 28px;
+  text-align: center;
+  font-size: var(--text-md);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--munch-brown);
+}

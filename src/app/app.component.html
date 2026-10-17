@@ -1,33 +1,81 @@
 <ion-app>
-  <ion-split-pane contentId="main-content">
-    <ion-menu contentId="main-content" type="overlay">
+  <!-- [when] collapses the split-pane to overlay mode on splash/login/signup:
+       the menu takes no space and cannot peek out beside the full-screen splash.
+       Note the parentheses — a bare `min-width: 992px` is an invalid media
+       query for matchMedia() and silently never matches. -->
+  <ion-split-pane
+    contentId="main-content"
+    [when]="menuEnabled() ? '(min-width: 992px)' : false">
+    <ion-menu
+      contentId="main-content"
+      type="overlay"
+      [swipeGesture]="menuEnabled() ? 'gesture' : 'false'">
       <ion-content>
-        <ion-list id="inbox-list">
-          <ion-list-header>Inbox</ion-list-header>
-          <ion-note>hi&#64;ionicframework.com</ion-note>
 
-          @for (p of appPages; track p; let i = $index) {
+        <!-- Top of the menu: user image, name and the tagline -->
+        <div class="menu-header">
+          <ion-avatar class="menu-avatar">
+            @if (avatarUrl() && !avatarFailed()) {
+              <img [src]="avatarUrl()" alt="Profile photo" (error)="avatarFailed.set(true)" />
+            } @else {
+              <div class="menu-avatar-fallback">{{ initials() }}</div>
+            }
+          </ion-avatar>
+          <p class="menu-name">{{ auth.displayName() }}</p>
+          <p class="menu-tagline">Rise, Munch, Repeat!</p>
+        </div>
+
+        <!-- Menu items, grouped under small headings (only the ones this role sees) -->
+        <ion-list id="menu-list">
+          @for (section of visibleSections(); track section.title) {
+            <p class="menu-section-title">{{ section.title }}</p>
+
+            @for (item of section.items; track item.url) {
+              <ion-menu-toggle auto-hide="false">
+                <ion-item
+                  [routerLink]="item.url"
+                  routerDirection="forward"
+                  lines="none"
+                  detail="false"
+                  routerLinkActive="selected"
+                  [routerLinkActiveOptions]="{ exact: true }">
+                  <ion-icon aria-hidden="true" slot="start" [name]="item.icon"></ion-icon>
+                  <ion-label>{{ item.label }}</ion-label>
+
+                  @if (item.badge === 'cart' && cart.count() > 0) {
+                    <ion-badge slot="end" color="primary">{{ cart.count() }}</ion-badge>
+                  }
+                  @if (item.badge === 'notifications' && notifications.unreadCount() > 0) {
+                    <ion-badge slot="end" color="tertiary">{{ notifications.unreadCount() }}</ion-badge>
+                  }
+                </ion-item>
+              </ion-menu-toggle>
+            }
+          }
+        </ion-list>
+
+        <!-- Last item: login or logout, depending on the state -->
+        <ion-list id="menu-login">
+          @if (auth.isLoggedIn()) {
             <ion-menu-toggle auto-hide="false">
-              <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
-                <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-                <ion-label>{{ p.title }}</ion-label>
+              <ion-item button lines="none" detail="false" (click)="logout()">
+                <ion-icon aria-hidden="true" slot="start" name="log-out-outline"></ion-icon>
+                <ion-label>Logout</ion-label>
+              </ion-item>
+            </ion-menu-toggle>
+          } @else {
+            <ion-menu-toggle auto-hide="false">
+              <ion-item routerLink="/login" routerDirection="forward" lines="none" detail="false" routerLinkActive="selected">
+                <ion-icon aria-hidden="true" slot="start" name="log-in-outline"></ion-icon>
+                <ion-label>Login / Sign up</ion-label>
               </ion-item>
             </ion-menu-toggle>
           }
         </ion-list>
 
-        <ion-list id="labels-list">
-          <ion-list-header>Labels</ion-list-header>
-
-          @for (label of labels; track label) {
-            <ion-item lines="none">
-              <ion-icon aria-hidden="true" slot="start" ios="bookmark-outline" md="bookmark-sharp"></ion-icon>
-              <ion-label>{{ label }}</ion-label>
-            </ion-item>
-          }
-        </ion-list>
       </ion-content>
     </ion-menu>
-    <ion-router-outlet id="main-content"></ion-router-outlet>
+
+    <ion-router-outlet id="main-content" [animation]="pageTransition"></ion-router-outlet>
   </ion-split-pane>
 </ion-app>

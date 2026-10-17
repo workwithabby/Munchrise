@@ -1,12 +1,10 @@
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
+ * Shared design system for every Munchrise screen. Tokens live in
+ * theme/variables.scss (colors, type, spacing, motion). This file wires the
+ * Ionic core CSS then defines the building blocks all pages reuse:
+ * cards, pills, chips, forms, empty states, action bars, motion + a11y.
  */
 
 /* Core CSS required for Ionic components to work properly */
@@ -28,10 +26,1789 @@
 /**
  * Ionic Dark Mode
  * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
+ * Munchrise stays light and warm on purpose (cozy morning brand),
+ * so the system dark palette is switched off.
  */
-
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/* ----------------------------------------------------------------------------
+   Munchrise design system — shared building blocks
+   ---------------------------------------------------------------------------- */
+
+/* ===== 1. Base type ===== */
+body {
+  font-family: var(--munch-font-body);
+  font-size: var(--text-md);
+  line-height: 1.55;
+  background: #ffffff;
+  color: var(--munch-brown);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* No double-tap-zoom delay: taps register immediately (iOS/Android). */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Page background: clean white with a whisper of morning colour (soft brand glows and a
+   faint dotted texture). It is painted INSIDE each page's content area and is fully opaque,
+   so two pages never show through each other while one replaces the other. */
+ion-content {
+  --background: transparent;
+}
+
+ion-content::part(background) {
+  background:
+    radial-gradient(circle, rgba(200, 72, 26, 0.1) 1.5px, transparent 2px) 0 0 / 34px 34px,
+    radial-gradient(circle, rgba(43, 128, 137, 0.08) 1.5px, transparent 2px) 17px 17px / 34px 34px,
+    radial-gradient(900px 480px at 0% -8%, rgba(220, 169, 62, 0.17), transparent 60%),
+    radial-gradient(760px 420px at 108% 8%, rgba(200, 72, 26, 0.07), transparent 56%),
+    radial-gradient(900px 560px at 50% 116%, rgba(43, 128, 137, 0.1), transparent 62%),
+    #ffffff;
+}
+
+h1,
+h2,
+h3,
+.page-title {
+  font-family: var(--munch-font-heading);
+  font-weight: 400; /* Calistoga is single-weight; rely on size for hierarchy */
+  color: var(--munch-brown);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+
+h2 {
+  font-size: var(--text-lg);
+}
+
+h3 {
+  font-size: var(--text-md);
+}
+
+.muted,
+.page-sub {
+  color: var(--color-muted-text);
+}
+
+/* Numbers line up in totals, prices and counters */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 2. Page layout ===== */
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--gutter) var(--space-10);
+}
+
+/* Extra room so content clears the fixed bottom tab bar */
+.page--tabs {
+  padding-bottom: calc(var(--tab-bar-height) + var(--space-10) + env(safe-area-inset-bottom));
+}
+
+.page--wide {
+  max-width: 960px;
+}
+
+.page--narrow {
+  max-width: 440px;
+}
+
+/* Stack direct children with one consistent gap */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack--sm {
+  gap: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+/* Page heading block inside the content (big friendly title + one line) */
+.page-intro {
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.page-intro h1 {
+  margin: 0;
+}
+
+.page-intro p {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-md);
+  color: var(--color-muted-text);
+}
+
+.page-intro--center {
+  text-align: center;
+}
+
+/* Centered brand mark + title (Login, Sign up, logged-out Profile) */
+.brand-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding-top: var(--space-4);
+  text-align: center;
+}
+
+/* The Munchrise logo on Login, Sign up and Verify */
+.brand-logo {
+  width: min(56vw, 200px);
+  height: auto;
+  filter: drop-shadow(0 6px 14px rgba(74, 44, 23, 0.2));
+}
+
+.brand-block h1 {
+  margin: var(--space-2) 0 0;
+}
+
+.brand-block p {
+  margin: 0;
+}
+
+/* Small Munchrise wordmark in the top bar (Login, Sign up) */
+.nav-brand {
+  align-self: center;
+  font-family: var(--munch-font-heading);
+  font-size: 21px;
+  color: var(--munch-brown);
+  line-height: 1;
+}
+
+.nav-brand span {
+  color: var(--munch-orange);
+}
+
+/* Brand stays centered in the title; the page name sits on the toolbar's right */
+ion-title.nav-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+/* "Login" / "Sign up" label: inset by the same gutter as the page content, so its
+   right edge lines up with the form fields below instead of touching the screen edge. */
+.nav-page {
+  align-self: center;
+  padding-inline-end: var(--gutter);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+}
+
+/* Brand wordmark used in toolbars (Home, etc.) */
+.brand-title {
+  font-family: var(--munch-font-heading);
+  font-size: 21px;
+  color: var(--munch-brown);
+}
+
+.brand-title span {
+  color: var(--munch-orange);
+}
+
+/* ===== 3. Surfaces ===== */
+.card {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Inset block inside a card (stat tiles, tier rows, nutrition) */
+.tile {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* One hero style for Dashboard welcome, Rewards balance and About */
+.card--hero {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  color: var(--munch-white);
+  background: linear-gradient(140deg, var(--grad-hero-start) 0%, var(--grad-hero-end) 92%);
+  box-shadow: var(--shadow-md);
+}
+
+.card--hero::before {
+  /* fine film grain — gives the flat gradient a printed, premium feel */
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  mix-blend-mode: overlay;
+}
+
+.card--hero::after {
+  /* soft "sunrise" glow — decorative only */
+  content: '';
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(220, 169, 62, 0.38);
+  pointer-events: none;
+  filter: blur(6px);
+}
+
+.card--hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.card--hero h1,
+.card--hero h2,
+.card--hero h3,
+.card--hero p {
+  color: var(--munch-white);
+}
+
+.card--hero .muted {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ===== 4. Section titles ===== */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.section-title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--munch-font-heading);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--munch-brown);
+}
+
+.section-head .section-title {
+  margin: 0;
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--munch-orange);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.section {
+  margin-top: var(--space-6);
+}
+
+/* ===== 5. Icons in a circle (empty states, brand marks, rows) ===== */
+.icon-circle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(200, 72, 26, 0.1);
+  color: var(--munch-orange);
+  font-size: var(--icon-md);
+}
+
+.icon-circle--lg {
+  width: 72px;
+  height: 72px;
+  font-size: 32px;
+}
+
+.icon-circle--teal {
+  background: rgba(43, 128, 137, 0.12);
+  color: var(--munch-teal);
+}
+
+.icon-circle--success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.icon-circle--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+/* ===== 6. Pills: status, tags, roles ===== */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 26px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: var(--surface-muted);
+  color: var(--munch-brown);
+  border: 1px solid var(--color-border);
+}
+
+.pill ion-icon {
+  font-size: 14px;
+}
+
+.pill--brand {
+  background: var(--munch-orange);
+  border-color: var(--munch-orange);
+  color: var(--munch-white);
+}
+
+.pill--teal {
+  background: rgba(43, 128, 137, 0.1);
+  border-color: transparent;
+  color: var(--color-teal-ink);
+}
+
+.pill--success {
+  background: var(--color-success-bg);
+  border-color: transparent;
+  color: var(--color-success);
+}
+
+.pill--warning {
+  background: var(--color-warning-bg);
+  border-color: transparent;
+  color: var(--color-amber-ink);
+}
+
+.pill--danger {
+  background: var(--color-danger-bg);
+  border-color: transparent;
+  color: var(--color-danger);
+}
+
+/* Order status: Placed -> Preparing -> Out for Delivery -> Delivered */
+.status-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-pill[data-status='Placed'] {
+  background: var(--color-warning-bg);
+  border-color: transparent;
+  color: var(--color-amber-ink);
+}
+
+.status-pill[data-status='Preparing'] {
+  background: rgba(43, 128, 137, 0.1);
+  border-color: transparent;
+  color: var(--color-teal-ink);
+}
+
+.status-pill[data-status='Out for Delivery'] {
+  background: rgba(200, 72, 26, 0.1);
+  border-color: transparent;
+  color: var(--munch-orange);
+}
+
+.status-pill[data-status='Cancelled'] {
+  background: rgba(176, 42, 42, 0.12);
+  color: var(--color-danger, #b02a2a);
+  border-color: transparent;
+}
+
+.status-pill[data-status='Delivered'] {
+  background: var(--color-success-bg);
+  border-color: transparent;
+  color: var(--color-success);
+}
+
+/* ===== 7. Empty states (see components/empty-state) ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-10) var(--space-4);
+  text-align: center;
+}
+
+.empty-state__title {
+  margin: var(--space-2) 0 0;
+  font-family: var(--munch-font-heading);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--munch-brown);
+}
+
+.empty-state__text {
+  max-width: 320px;
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--color-muted-text);
+}
+
+.empty-state__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 320px;
+  margin-top: var(--space-3);
+}
+
+.empty-state__actions:empty {
+  display: none;
+}
+
+/* ===== 8. Filter chips (Home, Products) ===== */
+.chip-row {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: var(--space-3) var(--gutter) var(--space-1);
+  scrollbar-width: none;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  /* let the finger pan the row sideways without ion-content stealing the gesture */
+  touch-action: pan-x pan-y;
+}
+
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.chip-row--wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+
+.filter-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--munch-brown);
+  font-family: var(--munch-font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.filter-chip:active {
+  background: var(--surface-muted);
+  transform: scale(0.97);
+}
+
+.filter-chip.is-active {
+  background: var(--munch-brown);
+  border-color: var(--munch-brown);
+  color: var(--munch-white);
+}
+
+/* ===== 9. Product grid ===== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (min-width: 600px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 900px) {
+  .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.result-count {
+  margin: var(--space-4) 0 var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-muted-text);
+}
+
+/* ===== 10. Money summaries (Cart, Checkout, Receipt) ===== */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-size: var(--text-md);
+  color: var(--munch-brown);
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-row > :first-child {
+  color: var(--color-muted-text);
+}
+
+.summary-row--discount,
+.summary-row--discount > :first-child {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.summary-row--total {
+  margin-top: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border-strong);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+
+.summary-row--total > :first-child {
+  color: var(--munch-brown);
+}
+
+.summary-row--total > :last-child {
+  color: var(--munch-orange);
+}
+
+.text-success {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+/* ===== 11. Forms ===== */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+/* Every text field = outlined, soft radius, white, orange focus
+   (.field.field outranks Ionic's own fill-outline defaults) */
+ion-input.field.field,
+ion-textarea.field.field,
+ion-select.field.field {
+  --background: var(--surface);
+  --border-color: var(--color-border-strong);
+  --border-radius: var(--radius-md);
+  --highlight-color-focused: var(--munch-orange);
+  --highlight-color-valid: var(--munch-orange);
+  --highlight-color-invalid: var(--color-danger);
+  --placeholder-color: var(--color-muted-text);
+  --placeholder-opacity: 1;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  min-height: 56px;
+  font-size: var(--text-md);
+  color: var(--munch-brown);
+}
+
+ion-input.field .label-text,
+ion-textarea.field .label-text,
+ion-select.field .label-text {
+  color: var(--color-muted-text);
+  font-weight: 500;
+}
+
+/* Form-level message (not tied to one field) */
+.form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.form-error ion-icon {
+  flex-shrink: 0;
+  font-size: var(--icon-sm);
+  margin-top: 1px;
+}
+
+/* Info callout ("Demo only", tips) */
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgba(43, 128, 137, 0.08);
+  color: var(--color-teal-ink);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.callout ion-icon {
+  flex-shrink: 0;
+  font-size: var(--icon-sm);
+  margin-top: 1px;
+}
+
+.callout--success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+/* Divider with a word in the middle ("or") */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Selectable option rows (payment methods) */
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+}
+
+.option-list ion-item {
+  --background: var(--surface);
+  --border-radius: var(--radius-md);
+  --border-width: 1px;
+  --border-color: var(--color-border-strong);
+  --border-style: solid;
+  --min-height: 52px;
+  --padding-start: var(--space-3);
+  --inner-padding-end: var(--space-3);
+  font-weight: 600;
+}
+
+/* ===== 12. Rows inside cards (addresses, payments, history) ===== */
+.row-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row-item:last-child {
+  border-bottom: none;
+}
+
+.row-item__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row-item__title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--munch-brown);
+}
+
+.row-item__meta {
+  margin: 2px 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+.row-item__value {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--munch-brown);
+}
+
+/* Row thumbnail: app-product-image in a fixed slot
+   (element + class so it beats the component's own width: 100%) */
+app-product-image.thumb {
+  flex-shrink: 0;
+  width: 64px;
+  --img-radius: var(--radius-md);
+}
+
+app-product-image.thumb--sm {
+  width: 48px;
+  --img-radius: var(--radius-sm);
+}
+
+/* ===== 13. Buttons ===== */
+ion-button {
+  --border-radius: var(--radius-md);
+  --box-shadow: none;
+  min-height: 48px;
+  margin: 0;
+  font-family: var(--munch-font-body);
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  transition: transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+
+ion-button[size='small'] {
+  min-height: 40px;
+  font-size: var(--text-sm);
+}
+
+ion-button[fill='outline'] {
+  --border-width: 1.5px;
+}
+
+/* Buttons inside the toolbar keep the compact native look */
+ion-toolbar ion-button {
+  min-height: 44px;
+  font-size: var(--text-sm);
+}
+
+ion-button:active:not(.button-disabled) {
+  transform: scale(0.98);
+}
+
+ion-button.button-disabled {
+  opacity: 0.5;
+}
+
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.btn-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btn-row > ion-button {
+  flex: 1;
+}
+
+/* Hidden file input styled as a soft button */
+.soft-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--surface);
+  color: var(--munch-orange);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Round icon button (hearts, bins) — 44px tap target */
+.icon-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--munch-brown);
+  font-size: var(--icon-md);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.icon-button:active {
+  transform: scale(0.92);
+  background: var(--surface-muted);
+}
+
+.icon-button--danger {
+  color: var(--color-danger);
+}
+
+.icon-button.is-on {
+  color: var(--munch-orange);
+}
+
+/* ===== 14. Ionic component defaults ===== */
+ion-card {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Ionic paints lists white by default; ours sit on cream unless they are a .card */
+ion-list,
+ion-list.list-md,
+ion-list.list-ios {
+  background: transparent;
+}
+
+ion-list.card {
+  background: var(--surface);
+}
+
+ion-searchbar.search {
+  --background: var(--surface);
+  --border-radius: var(--radius-md);
+  --box-shadow: none;
+  --color: var(--munch-brown);
+  --placeholder-color: var(--color-muted-text);
+  --placeholder-opacity: 1;
+  --icon-color: var(--color-muted-text);
+  padding: 0;
+}
+
+ion-searchbar.search .searchbar-input-container {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+ion-searchbar.search .searchbar-input {
+  min-height: 48px;
+  font-size: var(--text-md) !important;
+}
+
+ion-badge {
+  font-family: var(--munch-font-body);
+  font-weight: 700;
+}
+
+ion-segment {
+  --background: transparent;
+}
+
+ion-segment-button {
+  --color: var(--color-muted-text);
+  --color-checked: var(--munch-orange);
+  --indicator-color: var(--munch-orange);
+  min-height: 44px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Toasts show at the top so they never cover the sticky action bars */
+ion-toast {
+  --border-radius: var(--radius-md);
+  --box-shadow: var(--shadow-lg);
+  font-weight: 500;
+}
+
+ion-progress-bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+}
+
+/* ===== 15. Header / toolbar ===== */
+ion-toolbar {
+  --background: var(--munch-white);
+  --color: var(--munch-brown);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--color-border);
+  --min-height: 56px;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+
+.header-md {
+  box-shadow: none;
+}
+
+ion-title {
+  font-family: var(--munch-font-body);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--munch-brown);
+  letter-spacing: -0.01em;
+}
+
+ion-menu-button,
+ion-back-button {
+  --color: var(--munch-brown);
+}
+
+/* Sticky bottom action bar (Product details, Cart, Checkout) */
+.action-footer {
+  background: var(--munch-white);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 16px rgba(74, 44, 23, 0.06);
+}
+
+.action-footer.footer-md {
+  box-shadow: 0 -4px 16px rgba(74, 44, 23, 0.06);
+}
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom));
+}
+
+.action-bar > ion-button {
+  flex: 1;
+  min-height: 52px;
+}
+
+.action-bar__total {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.action-bar__total span {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted-text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.action-bar__total strong {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--munch-brown);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 16. Motion & micro-interactions ===== */
+/* Page changes animate in the router outlet (app.component.ts: quickTransition)
+   — a fast 170ms fade + rise instead of the slower default slide. */
+
+/* --- Universal press feedback -----------------------------------------
+   Every tappable surface — tabs, cards, rows, chips, steppers, links,
+   header buttons — answers the finger the same way: a light, springy shrink
+   that settles back the instant you let go. transform + opacity only, so
+   nothing reflows. `:active` fires on touch-down, so it feels instant.
+   We also silence the default grey tap-flash so our scale IS the feedback. */
+ion-button,
+ion-tab-button,
+ion-item,
+.card,
+ion-card,
+.product-card,
+.tile,
+.filter-chip,
+.icon-button,
+.soft-button,
+.add-btn,
+.cart-button,
+.section-link,
+.qty-picker .step,
+ion-segment-button,
+ion-searchbar .searchbar-clear-button,
+.star-picker button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Shared settle transition for the tappables that don't have one yet. */
+ion-tab-button,
+ion-item,
+.card,
+ion-card,
+.tile,
+.soft-button,
+.add-btn,
+.cart-button,
+.section-link,
+ion-segment-button,
+ion-menu-button,
+ion-back-button {
+  transition: transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+
+/* The press itself: one consistent, gentle shrink (0.97). Elements that want
+   a punchier response (icon buttons, stars) override below. */
+ion-tab-button:active,
+ion-item:active,
+.card:active,
+ion-card:active,
+.tile:active,
+.soft-button:active,
+.add-btn:active,
+.cart-button:active,
+.section-link:active,
+ion-segment-button:active,
+ion-menu-button:active,
+ion-back-button:active {
+  transform: scale(0.97);
+}
+
+/* Tabs dim their icon/label a touch while pressed for extra feedback. */
+ion-tab-button:active ion-icon,
+ion-tab-button:active ion-label {
+  opacity: 0.7;
+}
+
+/* Tap feedback: quick press scale on buttons (transform only — no layout shift). */
+ion-button:not([disabled]) {
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+ion-button:not([disabled]):active {
+  transform: scale(0.96);
+}
+
+/* Star picker presses with a little pop. */
+.star-picker button {
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.star-picker button:active {
+  transform: scale(0.86);
+}
+
+/* Cards lift softly on hover (pointer devices only — touch keeps them still). */
+.card {
+  transition:
+    transform var(--dur-base) var(--ease),
+    box-shadow var(--dur-base) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Press always beats hover: while held, the shrink wins over the lift. */
+.card:active {
+  transform: scale(0.97);
+}
+
+/* ===== 17. Bottom tab bar ===== */
+ion-tab-bar {
+  --background: rgba(255, 255, 255, 0.97);
+  --border: none;
+  height: calc(var(--tab-bar-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -1px 0 var(--color-border), 0 -8px 24px rgba(74, 44, 23, 0.05);
+}
+
+ion-tab-bar {
+  box-sizing: border-box;
+  align-items: stretch;
+  contain: none;
+}
+
+ion-tab-button {
+  --color: var(--color-muted-text);
+  --color-selected: var(--munch-orange);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 2px;
+  --padding-end: 2px;
+  min-width: 0;
+  max-width: none;
+  height: var(--tab-bar-height);
+  align-self: flex-start;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  overflow: hidden;
+}
+
+ion-tab-button .tab-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+ion-tab-button ion-icon {
+  font-size: 22px;
+  margin: 0;
+}
+
+ion-tab-button ion-label {
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cart badge on the tab */
+ion-tab-button .tab-badge {
+  position: absolute;
+  top: -4px;
+  left: 100%;
+  margin-left: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--munch-orange);
+  color: var(--munch-white);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* ===== 18. Accessibility + motion ===== */
+/* Text for screen readers only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--munch-teal);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(43, 128, 137, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== 18. 2026 polish layer =====
+   Clean header, rounded tab bar, scroll-snapped chip rows with edge
+   fades. Tokens only — no new colors. */
+
+ion-header ion-toolbar {
+  /* colors come from --ion-toolbar-background (theme/variables.scss) */
+  --border-width: 0;
+  --min-height: 56px;
+}
+
+ion-header::after {
+  display: none; /* drop Ionic's hard hairline; the blur separates content */
+}
+
+ion-title {
+  font-family: var(--munch-font-heading);
+  font-weight: 400;
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
+}
+
+/* Chip rows: snap to chips and fade the edges so it is obvious there is more */
+.chip-row:not(.chip-row--wrap) {
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--gutter);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - 28px), transparent 100%);
+}
+
+.chip-row:not(.chip-row--wrap) .filter-chip {
+  scroll-snap-align: start;
+  white-space: nowrap;
+}
+
+.filter-chip {
+  gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-chip.is-active {
+  box-shadow: var(--shadow-md);
+}
+
+.filter-chip--sm {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-xs);
+  box-shadow: none;
+}
+
+.chip-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(74, 44, 23, 0.08);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.filter-chip.is-active .chip-count {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.sort-row {
+  padding-top: var(--space-1);
+}
+
+
+/* ===== 18. 2026 polish layer =====
+   Clean header, rounded tab bar, scroll-snapped chip rows with edge
+   fades. Tokens only — no new colors. */
+
+ion-header ion-toolbar {
+  /* colors come from --ion-toolbar-background (theme/variables.scss) */
+  --border-width: 0;
+  --min-height: 56px;
+}
+
+ion-header::after {
+  display: none; /* drop Ionic's hard hairline; the blur separates content */
+}
+
+ion-title {
+  font-family: var(--munch-font-heading);
+  font-weight: 400;
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
+}
+
+/* Chip rows: snap to chips and fade the edges so it is obvious there is more */
+.chip-row:not(.chip-row--wrap) {
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--gutter);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - 28px), transparent 100%);
+}
+
+.chip-row:not(.chip-row--wrap) .filter-chip {
+  scroll-snap-align: start;
+  white-space: nowrap;
+}
+
+.filter-chip {
+  gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-chip.is-active {
+  box-shadow: var(--shadow-md);
+}
+
+.filter-chip--sm {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-xs);
+  box-shadow: none;
+}
+
+.chip-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(74, 44, 23, 0.08);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.filter-chip.is-active .chip-count {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.sort-row {
+  padding-top: var(--space-1);
+}
+
+/* ===== 19. Admin screens (shared) ===== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.kpi-grid--3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .kpi-grid:not(.kpi-grid--3) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--munch-brown);
+  text-decoration: none;
+}
+
+.kpi__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted-text);
+}
+
+.kpi__value {
+  font-family: var(--munch-font-heading);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.kpi__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted-text);
+}
+
+.kpi--brand {
+  border-color: transparent;
+  background: linear-gradient(160deg, var(--grad-hero-start), var(--grad-hero-end));
+  box-shadow: var(--shadow-md);
+}
+
+.kpi--brand .kpi__label,
+.kpi--brand .kpi__value {
+  color: var(--munch-white);
+}
+
+.kpi--warning .kpi__value {
+  color: var(--color-warning);
+}
+
+.kpi--danger .kpi__value {
+  color: var(--color-danger);
+}
+
+a.kpi:active {
+  background: var(--surface-muted);
+}
+
+.plain-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plain-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 44px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.plain-row:last-child {
+  border-bottom: 0;
+}
+
+.plain-row__name {
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Admin alignment: one vertical rhythm and one left edge on every admin page --- */
+.section-head h2 {
+  margin: 0;
+}
+
+/* Inside a .stack the gap already spaces things, so drop the chip row's own top padding */
+.stack > .chip-row {
+  padding-top: 0;
+}
+
+.stack > .result-count,
+.stack > ion-searchbar.search {
+  margin: 0;
+}
+
+.stack > .search-row {
+  margin: 0;
+}
+
+/* ===== 19. Motion layer (all roles: guest, user, admin) =====
+   Everything here is transform / opacity only, and every entrance uses
+   `backwards` fill so nothing is left transformed afterwards (no stacking
+   contexts, no broken fixed/sticky children). Switched off for reduced motion. */
+
+/* Staggered entrance: the blocks of every page rise in one after another.
+   Runs when the page (or a new list row) is created. */
+.page > *,
+.page > .stack > *,
+.product-grid > *,
+.row-list > *,
+.shortcuts > *,
+.perks > *,
+.chip-row > * {
+  animation: m-rise 0.55s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards;
+}
+
+.page > :nth-child(1), .stack > :nth-child(1), .product-grid > :nth-child(1), .row-list > :nth-child(1), .shortcuts > :nth-child(1), .chip-row > :nth-child(1) { animation-delay: 0.04s; }
+.page > :nth-child(2), .stack > :nth-child(2), .product-grid > :nth-child(2), .row-list > :nth-child(2), .shortcuts > :nth-child(2), .chip-row > :nth-child(2) { animation-delay: 0.10s; }
+.page > :nth-child(3), .stack > :nth-child(3), .product-grid > :nth-child(3), .row-list > :nth-child(3), .shortcuts > :nth-child(3), .chip-row > :nth-child(3) { animation-delay: 0.16s; }
+.page > :nth-child(4), .stack > :nth-child(4), .product-grid > :nth-child(4), .row-list > :nth-child(4), .shortcuts > :nth-child(4), .chip-row > :nth-child(4) { animation-delay: 0.22s; }
+.page > :nth-child(5), .stack > :nth-child(5), .product-grid > :nth-child(5), .row-list > :nth-child(5), .chip-row > :nth-child(5) { animation-delay: 0.28s; }
+.page > :nth-child(6), .stack > :nth-child(6), .product-grid > :nth-child(6), .row-list > :nth-child(6), .chip-row > :nth-child(6) { animation-delay: 0.34s; }
+.page > :nth-child(n + 7), .stack > :nth-child(n + 7), .product-grid > :nth-child(n + 7), .row-list > :nth-child(n + 7), .chip-row > :nth-child(n + 7) { animation-delay: 0.40s; }
+
+/* Hero cards: slow drifting light so the main banner feels alive */
+.card--hero {
+  background-size: 180% 180%;
+  animation: m-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards, m-sheen 10s ease-in-out 0.6s infinite;
+}
+
+/* Icon circles bounce when their card is touched / hovered */
+.card:active .icon-circle,
+a.card:hover .icon-circle,
+.row-item:active .icon-circle {
+  animation: m-wiggle 0.5s ease;
+}
+
+/* Pills & badges pop in when they appear (cart count, status, unread…) */
+.pill,
+.status-pill,
+ion-badge,
+.tab-badge {
+  animation: m-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+/* Interactive rows */
+.row-item,
+.filter-chip,
+.product-card {
+  transition: transform var(--dur-fast, 150ms) ease, box-shadow var(--dur-base, 250ms) ease, background-color var(--dur-base, 250ms) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  .filter-chip:hover {
+    transform: translateY(-1px);
+  }
+}
+.filter-chip.is-active {
+  animation: m-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Side menu: items slide in one by one each time it opens */
+ion-menu.show-menu .menu-header,
+ion-menu.show-menu #menu-list ion-item,
+ion-menu.show-menu #menu-login ion-item {
+  animation: m-slide 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+ion-menu.show-menu #menu-list ion-menu-toggle:nth-of-type(1) ion-item { animation-delay: 0.06s; }
+ion-menu.show-menu #menu-list ion-menu-toggle:nth-of-type(2) ion-item { animation-delay: 0.11s; }
+ion-menu.show-menu #menu-list ion-menu-toggle:nth-of-type(3) ion-item { animation-delay: 0.16s; }
+ion-menu.show-menu #menu-list ion-menu-toggle:nth-of-type(4) ion-item { animation-delay: 0.21s; }
+ion-menu.show-menu #menu-list ion-menu-toggle:nth-of-type(5) ion-item { animation-delay: 0.26s; }
+ion-menu.show-menu #menu-list ion-menu-toggle:nth-of-type(n + 6) ion-item { animation-delay: 0.30s; }
+ion-menu.show-menu #menu-login ion-item { animation-delay: 0.34s; }
+
+.menu-avatar {
+  animation: m-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
+}
+
+/* Toasts & alerts arrive with a little bounce */
+ion-toast::part(container) {
+  animation: m-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Empty states float gently so they feel friendly, not dead */
+.empty-state .icon-circle,
+.empty-state > ion-icon {
+  animation: m-float 4s ease-in-out infinite;
+}
+
+@keyframes m-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes m-slide { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
+@keyframes m-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes m-tab-pop { 0% { transform: scale(0.7) translateY(2px); } 100% { transform: none; } }
+@keyframes m-wiggle { 0%, 100% { rotate: 0deg; } 30% { rotate: -14deg; } 60% { rotate: 10deg; } }
+@keyframes m-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes m-sheen { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page *, ion-menu *, ion-tab-bar *, .card--hero {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== 20. Rich background, tab bar, badges ===== */
+
+/* Header: solid white */
+ion-header ion-toolbar {
+  --background: #ffffff;
+  box-shadow: 0 1px 0 rgba(200, 72, 26, 0.1), 0 6px 18px rgba(74, 44, 23, 0.06);
+}
+
+/* Bottom nav: solid white (no blur, so no flicker). The highlight pill is centred on the icon
+   itself (.tab-icon), so it can never drift out of line with it. */
+ion-tab-bar {
+  --background: #ffffff;
+  --border: none;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -1px 0 var(--color-border), 0 -10px 30px rgba(74, 44, 23, 0.08);
+  padding-top: 4px;
+}
+ion-tab-button {
+  --color: var(--color-muted-text);
+  --color-selected: var(--munch-orange);
+  --ripple-color: transparent;
+  position: relative;
+  gap: 2px;
+}
+ion-tab-button.is-selected {
+  --color: var(--munch-orange);
+}
+ion-tab-button .tab-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 30px;
+}
+ion-tab-button .tab-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(220, 169, 62, 0.35), rgba(200, 72, 26, 0.2));
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.2s ease, transform 0.25s ease;
+}
+ion-tab-button.is-selected .tab-icon::before {
+  opacity: 1;
+  transform: none;
+}
+ion-tab-button .tab-icon ion-icon {
+  position: relative;
+  font-size: 24px;
+  transform: none;
+  transition: none;
+}
+ion-tab-button.is-selected ion-label {
+  font-weight: 700;
+}
+/* Pressing a tab must not move it (the old press-scale made the bar jitter). */
+ion-tab-button:active {
+  transform: none;
+}
+ion-tab-button:active ion-icon,
+ion-tab-button:active ion-label {
+  opacity: 1;
+}
+
+/* Tab cart badge: small and tidy, pinned to the icon */
+ion-tab-button .tab-icon .tab-badge {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  margin-left: 6px;
+  min-width: 8px;
+  height: 14px;
+  padding: 0 4px;
+  font-size: 9px;
+  line-height: 14px;
+  border: 1.5px solid var(--munch-white);
+  box-sizing: content-box;
+  z-index: 2;
+}
+
+/* ===== 21. Dropdown notifications + right-side cart drawer ===== */
+ion-popover.notif-popover {
+  --width: min(320px, 88vw);
+  --box-shadow: var(--shadow-lg);
+  --backdrop-opacity: 0.12;
+}
+ion-popover.notif-popover::part(content) {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+ion-modal.cart-drawer {
+  --width: min(320px, 80vw);
+  --height: 100%;
+  --border-radius: 24px 0 0 24px;
+  --backdrop-opacity: 0.35;
+  --box-shadow: -12px 0 40px rgba(74, 44, 23, 0.22);
+  justify-content: flex-end;
+}
+ion-modal.cart-drawer ion-content {
+  --background: linear-gradient(180deg, #fffaf0 0%, #fff1d4 100%);
+}
+ion-modal.cart-drawer ion-toolbar {
+  --background: rgba(255, 248, 232, 0.9);
+  border-radius: 24px 0 0 0;
+}
+
+/* Tab bar cart badge: same small size */
+ion-tab-button .tab-badge {
+  top: 5px;
+  min-width: 10px;
+  height: 10px;
+  padding: 0 2px;
+  font-size: 7px;
+  line-height: 10px;
+  border-width: 1px;
+  box-sizing: border-box;
+}
+
+/* ===== Login / Sign up: everything fits one screen, no scrolling ===== */
+.auth-fit {
+  box-sizing: border-box;
+  height: 100%;
+  justify-content: space-evenly;
+  gap: clamp(6px, 1.4vh, 14px);
+  padding-top: clamp(4px, 1vh, 12px);
+  padding-bottom: calc(clamp(4px, 1vh, 12px) + env(safe-area-inset-bottom));
+}
+
+.auth-fit .brand-block {
+  padding-top: 0;
+  gap: 0;
+}
+
+.auth-fit .brand-logo {
+  width: auto;
+  height: clamp(44px, 10vh, 96px);
+}
+
+.auth-fit .brand-block h1 {
+  margin-top: 4px;
+  font-size: clamp(1.15rem, 3vh, 1.5rem);
+}
+
+.auth-fit .brand-block p {
+  font-size: var(--text-sm);
+}
+
+.auth-fit .form-stack {
+  gap: clamp(8px, 1.6vh, 14px);
+}
+
+.auth-fit ion-input.field.field {
+  min-height: clamp(46px, 7vh, 56px);
+}
+
+.auth-fit ion-button {
+  margin: 0;
+}
+
+.auth-fit .callout {
+  display: none;
+}
+
+@media (min-height: 780px) {
+  .auth-fit .callout {
+    display: flex;
+  }
+}
+
+/* No green/teal box around the text being typed — the field's own orange outline is enough */
+ion-input input:focus,
+ion-input input:focus-visible,
+ion-textarea textarea:focus,
+ion-textarea textarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+}

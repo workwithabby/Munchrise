@@ -1,0 +1,50 @@
+<!-- Supabase → Authentication → Emails → Confirm sign up.
+     LOGO: emails can only show an image from a public https address. Create a PUBLIC Storage
+     bucket named "assets" (Supabase → Storage), upload src/assets/logo/munchrise-logo.png
+     into it, and the logo URL below will work as written.
+     Subject: Your Munchrise code: {{ .Token }}
+     Paste everything below this comment into the "Message body" box. -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#fff4dc;">
+  Your Munchrise verification code is {{ .Token }}. It expires soon.
+</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fff4dc;padding:32px 16px;font-family:Inter,Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:24px;overflow:hidden;">
+        <tr>
+          <td align="center" style="background:#dca93e;padding:28px 24px;">
+            <img src="https://gfaimxraradnsjvznavq.supabase.co/storage/v1/object/public/assets/munchrise-logo.png" alt="Munchrise" width="180" style="display:block;margin:0 auto;width:180px;max-width:70%;height:auto;border:0;">
+            <div style="margin-top:8px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#4a2c17;">Make every morning tastier</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 28px 12px;color:#4a2c17;text-align:center;">
+            <h1 style="margin:0 0 12px;font-family:Georgia,serif;font-size:26px;line-height:1.2;color:#4a2c17;">Rise and munch!</h1>
+            <p style="margin:0;font-size:16px;line-height:1.5;color:#4a2c17;">
+              Use this code to confirm your email and finish creating your account.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:20px 28px;">
+            <div style="display:inline-block;background:#fff4dc;border:2px dashed #dca93e;border-radius:16px;padding:18px 28px;">
+              <span style="font-family:'Courier New',Courier,monospace;font-size:40px;font-weight:bold;letter-spacing:12px;color:#c8481a;padding-left:12px;">{{ .Token }}</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 28px 32px;color:#7a5a45;text-align:center;font-size:14px;line-height:1.6;">
+            Copy the code, go back to the Munchrise app and paste it in the box.<br>
+            This code expires soon, so use it right away.
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="background:#fff4dc;padding:18px 24px;font-size:12px;line-height:1.5;color:#7a5a45;">
+            Didn't sign up for Munchrise? You can safely ignore this email.<br>
+            Never share this code with anyone.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

@@ -1,0 +1,42 @@
+/* Overview-only bits; shared admin blocks (kpi, plain-list…) live in global.scss */
+.bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+}
+
+.bar-row__top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--munch-orange);
+}
+
+.link-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--munch-brown);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-card__go {
+  margin-inline-start: auto;
+  color: var(--color-muted-text);
+}

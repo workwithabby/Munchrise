@@ -1,0 +1,123 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Cart</ion-title>
+    @if (cart.detailedItems().length > 0) {
+      <ion-buttons slot="end">
+        <ion-button color="danger" (click)="confirmClear()">Clear</ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--tabs">
+    @if (cart.detailedItems().length === 0) {
+      <app-empty-state
+        icon="cart-outline"
+        title="Your cart is empty. Let's fix that!"
+        text="Pick something warm and tasty from the menu.">
+        <ion-button routerLink="/products">Browse the menu</ion-button>
+      </app-empty-state>
+    } @else {
+      <!-- Cart items -->
+      <ion-list class="cart-list">
+        @for (item of cart.detailedItems(); track item.product.id) {
+          <ion-item-sliding class="cart-item">
+            <ion-item lines="none">
+              <div class="row-main">
+                <app-product-image
+                  class="thumb"
+                  [src]="item.product.image"
+                  [name]="item.product.name"
+                  [category]="item.product.category" />
+
+                <div class="row-text">
+                  <div class="row-top">
+                    <h2 class="item-name">{{ item.product.name }}</h2>
+                    <button
+                      type="button"
+                      class="icon-button icon-button--danger trash"
+                      (click)="remove(item.product.id, item.product.name)"
+                      [attr.aria-label]="'Remove ' + item.product.name + ' from cart'">
+                      <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+                    </button>
+                  </div>
+                  <p class="each">{{ item.product.price | peso }} each</p>
+                  <div class="row-bottom">
+                    <app-qty-picker
+                      [value]="item.quantity"
+                      [max]="item.product.stock"
+                      (valueChange)="setQuantity(item.product.id, $event)" />
+                    <span class="line-total num">{{ item.product.price * item.quantity | peso }}</span>
+                  </div>
+                </div>
+              </div>
+            </ion-item>
+
+            <!-- Bonus: swipe left to delete (the bin button is always visible too) -->
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="remove(item.product.id, item.product.name)">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        }
+      </ion-list>
+
+      <!-- Free delivery progress -->
+      @if (remainingForFreeDelivery() > 0) {
+        <p class="callout">
+          <ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon>
+          Add {{ remainingForFreeDelivery() | peso }} more for free delivery.
+        </p>
+      } @else {
+        <p class="callout callout--success">
+          <ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon>
+          Free delivery unlocked!
+        </p>
+      }
+
+      <!-- Summary -->
+      <section class="card summary-card">
+        <h2 class="section-title">Order summary</h2>
+        <div class="summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{ cart.subtotal() | peso }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Delivery fee</span>
+            @if (estimatedDeliveryFee() === 0) {
+              <span class="text-success">FREE</span>
+            } @else {
+              <span>{{ estimatedDeliveryFee() | peso }}</span>
+            }
+          </div>
+          <div class="summary-row summary-row--total">
+            <span>Total (est.)</span>
+            <span>{{ estimatedTotal() | peso }}</span>
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+</ion-content>
+
+<!-- Sticky checkout bar -->
+@if (cart.detailedItems().length > 0) {
+  <ion-footer class="action-footer">
+    <div class="action-bar">
+      <div class="action-bar__total">
+        <span>Total</span>
+        <strong>{{ estimatedTotal() | peso }}</strong>
+      </div>
+      <ion-button routerLink="/checkout">
+        Checkout
+        <ion-icon slot="end" name="arrow-forward" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-footer>
+}

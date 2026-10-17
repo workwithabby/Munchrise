@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Earnings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack">
+    <section class="card card--hero total">
+      <p class="muted">Earned today</p>
+      <p class="total__value num">{{ rider.today().earnings | peso }}</p>
+      <p class="muted">{{ rider.today().deliveries }} {{ rider.today().deliveries === 1 ? 'delivery' : 'deliveries' }}</p>
+    </section>
+
+    <section class="grid">
+      <div class="tile">
+        <span class="tile__label">Last 7 days</span>
+        <span class="tile__value num">{{ rider.week().earnings | peso }}</span>
+        <span class="tile__sub">{{ rider.week().deliveries }} deliveries</span>
+      </div>
+      <div class="tile">
+        <span class="tile__label">All time</span>
+        <span class="tile__value num">{{ rider.allTime().earnings | peso }}</span>
+        <span class="tile__sub">{{ rider.allTime().deliveries }} deliveries</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2 class="section-title">Cash to hand in</h2></div>
+      <p class="cash num">{{ rider.cashOnHand() | peso }}</p>
+      <p class="row-item__meta">Cash on Delivery payments you collected.</p>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2 class="section-title">Delivery history</h2></div>
+      @if (rider.completed().length === 0) {
+        <app-empty-state icon="receipt-outline" title="No deliveries yet" text="Finished deliveries and their earnings show up here." />
+      } @else {
+        <ul class="row-list">
+          @for (order of rider.completed(); track order.id) {
+            <li class="row-item">
+              <div class="row-item__main">
+                <p class="row-item__title">{{ order.id }} · {{ order.shipping.fullName }}</p>
+                <p class="row-item__meta">{{ deliveredAt(order) | date: 'MMM d, h:mm a' }} · {{ order.shipping.city }}</p>
+              </div>
+              <span class="row-item__value num">+{{ order.deliveryFee | peso }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <app-role-tab-bar role="rider" />
+</ion-footer>

@@ -1,0 +1,90 @@
+/* One picture, everywhere: 3:2, rounded, cream background */
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--img-radius, var(--radius-lg));
+  overflow: hidden;
+  background: var(--munch-cream);
+}
+
+img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Category cover: duotone gradient + centered white line-art icon */
+.cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* soft top-left highlight so the gradient feels lit, not flat */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.cover::before {
+  /* faint circular glow behind the icon */
+  content: '';
+  position: absolute;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cover-icon {
+  position: relative;
+  width: 46%;
+  height: auto;
+  color: rgba(255, 255, 255, 0.96);
+  filter: drop-shadow(0 2px 6px rgba(74, 44, 23, 0.22));
+}
+
+/* Loading: warm shimmer until the (load) event fires */
+.skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    var(--munch-cream) 30%,
+    rgba(255, 255, 255, 0.75) 50%,
+    var(--munch-cream) 70%
+  );
+  background-size: 200% 100%;
+  animation: product-image-shimmer 1.2s linear infinite;
+}
+
+/* Error: cream box + the product name (no emoji, no broken icon) */
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: var(--munch-cream);
+  text-align: center;
+}
+
+.fallback-name {
+  font-family: var(--munch-font-heading);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--color-muted-text);
+}
+
+@keyframes product-image-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}

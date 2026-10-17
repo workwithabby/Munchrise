@@ -1,0 +1,99 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Rewards</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    <!-- Balance -->
+    <section class="card card--hero balance">
+      <p class="muted balance-label">Your points</p>
+      <p class="balance-value num">{{ rewards.points() }}</p>
+      <p class="muted balance-hint">Earn 1 point for every ₱10 you spend</p>
+
+      <ion-progress-bar class="progress" [value]="rewards.progress() / 100"></ion-progress-bar>
+      <p class="muted progress-caption">
+        @if (rewards.progress() >= 100) {
+          Highest tier unlocked!
+        } @else {
+          {{ rewards.progress() }}% toward your next reward ({{ rewards.nextTier()?.points }} pts)
+        }
+      </p>
+
+      @if (rewards.voucherTotal() > 0) {
+        <span class="pill voucher-pill">
+          <ion-icon name="gift-outline" aria-hidden="true"></ion-icon>
+          Voucher ready: {{ rewards.voucherTotal() | peso }}
+        </span>
+      }
+    </section>
+
+    <!-- Redeem tiers -->
+    <section class="card">
+      <h2 class="section-title">Redeem a discount</h2>
+
+      <ul class="row-list">
+        @for (tier of rewards.tiers; track tier.points) {
+          <li class="row-item">
+            <span class="icon-circle" aria-hidden="true"><ion-icon name="pricetag-outline"></ion-icon></span>
+            <div class="row-item__main">
+              <p class="row-item__title">{{ tier.discount | peso }} off</p>
+              <p class="row-item__meta">{{ tier.points }} points</p>
+            </div>
+            <ion-button
+              size="small"
+              [fill]="rewards.points() < tier.points ? 'outline' : 'solid'"
+              [disabled]="rewards.points() < tier.points"
+              (click)="redeem(tier)">
+              Redeem
+            </ion-button>
+          </li>
+        }
+      </ul>
+
+      <p class="callout note">
+        <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+        Vouchers apply automatically at checkout.
+      </p>
+    </section>
+
+    <!-- History -->
+    <section class="card">
+      <h2 class="section-title">Points history</h2>
+
+      @if (rewards.history().length === 0) {
+        <p class="muted empty-note">No points yet — place an order to start earning.</p>
+      } @else {
+        <ul class="row-list">
+          @for (tx of rewards.history(); track tx.id) {
+            <li class="row-item">
+              <span
+                class="icon-circle"
+                [class.icon-circle--success]="tx.type === 'earn'"
+                aria-hidden="true">
+                <ion-icon [name]="tx.type === 'earn' ? 'arrow-down' : 'arrow-up'"></ion-icon>
+              </span>
+              <div class="row-item__main">
+                <p class="row-item__title history-label">{{ tx.label }}</p>
+                <p class="row-item__meta">{{ tx.createdAt | date: 'mediumDate' }}</p>
+              </div>
+              <span
+                class="row-item__value"
+                [class.plus]="tx.type === 'earn'"
+                [class.minus]="tx.type === 'redeem'">
+                {{ tx.type === 'earn' ? '+' : '−' }}{{ tx.points }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</ion-content>

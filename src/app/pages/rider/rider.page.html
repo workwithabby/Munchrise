@@ -1,0 +1,121 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Deliveries</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack">
+    <section class="card card--hero rider-hello">
+      <div class="rider-hello__top">
+        <div class="rider-hello__text">
+          <p class="rider-hello__greeting">{{ greeting }},</p>
+          <h1>{{ firstName() }}!</h1>
+        </div>
+        <label class="rider-status" [class.is-online]="rider.online()">
+          <span class="rider-status__dot" aria-hidden="true"></span>
+          <span>{{ rider.online() ? 'Online' : 'Offline' }}</span>
+          <ion-toggle class="online-toggle" aria-label="Available for orders" [checked]="rider.online()"
+            (ionChange)="rider.setOnline(!!$event.detail.checked)"></ion-toggle>
+        </label>
+      </div>
+
+      <div class="rider-stats">
+        <div class="rider-stat">
+          <strong>{{ rider.today().deliveries }}</strong>
+          <span>Delivered today</span>
+        </div>
+        <div class="rider-stat">
+          <strong>{{ rider.today().earnings | peso }}</strong>
+          <span>Earned today</span>
+        </div>
+        <div class="rider-stat">
+          <strong>{{ countFor('pickup') }}</strong>
+          <span>To pick up</span>
+        </div>
+      </div>
+    </section>
+
+    @if (!rider.online()) {
+      <p class="callout"><ion-icon name="moon-outline" aria-hidden="true"></ion-icon> You are offline. Switch on to take new orders.</p>
+    }
+
+    <div class="chip-row" role="group" aria-label="Delivery status">
+      @for (t of tabs; track t.id) {
+        <button type="button" class="filter-chip" [class.is-active]="tab() === t.id"
+          [attr.aria-pressed]="tab() === t.id" (click)="tab.set(t.id)">
+          {{ t.label }}
+          <span class="chip-count">{{ countFor(t.id) }}</span>
+        </button>
+      }
+    </div>
+
+    @if (orders().length === 0) {
+      <app-empty-state icon="bicycle-outline"
+        [title]="tab() === 'pickup' ? 'Nothing to pick up' : tab() === 'ontheway' ? 'No active deliveries' : 'No deliveries yet'"
+        [text]="tab() === 'pickup' ? 'Orders show here once the kitchen is preparing them.' : tab() === 'ontheway' ? 'Pick up an order to start a delivery.' : 'Finished deliveries appear here.'" />
+    } @else {
+      @for (order of orders(); track order.id) {
+        <article class="card order-card">
+          <div class="order-head">
+            <div>
+              <p class="order-id">{{ order.id }}</p>
+              <p class="row-item__meta">{{ order.placedAt | date: 'MMM d, h:mm a' }}</p>
+            </div>
+            <span class="pill pill--teal">{{ order.status }}</span>
+          </div>
+
+          <div class="drop">
+            <strong>{{ order.shipping.fullName }}</strong>
+            <span>{{ order.shipping.address }}, {{ order.shipping.city }}</span>
+            @if (order.shipping.notes) {
+              <span class="row-item__meta">Note: {{ order.shipping.notes }}</span>
+            }
+            @if (order.status !== 'Delivered') {
+              <div class="drop__actions">
+                <a class="drop__btn" [href]="'tel:' + order.shipping.phone"><ion-icon name="call-outline" aria-hidden="true"></ion-icon> Call</a>
+                <a class="drop__btn" [href]="mapsUrl(order)" target="_blank" rel="noopener"><ion-icon name="navigate-outline" aria-hidden="true"></ion-icon> Navigate</a>
+              </div>
+            }
+          </div>
+
+          <ul class="order-lines">
+            @for (line of order.items; track line.productId) {
+              <li><span>{{ line.quantity }}× {{ line.name }}</span></li>
+            }
+          </ul>
+
+          @if (order.payment === 'Cash on Delivery' && order.status !== 'Delivered') {
+            <p class="collect">Collect {{ order.total | peso }} in cash</p>
+          } @else {
+            <p class="row-item__meta">Paid via {{ order.payment }} · Earn {{ order.deliveryFee | peso }}</p>
+          }
+
+          @if (order.status !== 'Delivered') {
+            <div class="order-foot">
+              <span class="order-total num">{{ order.total | peso }}</span>
+              @if (order.status === 'Preparing') {
+                <ion-button [disabled]="!rider.online()" (click)="pickUp(order)">
+                  <ion-icon slot="start" name="bag-check-outline" aria-hidden="true"></ion-icon>
+                  Pick up
+                </ion-button>
+              } @else {
+                <ion-button color="success" (click)="deliver(order)">
+                  <ion-icon slot="start" name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+                  Mark delivered
+                </ion-button>
+              }
+            </div>
+          }
+        </article>
+      }
+    }
+  </div>
+</ion-content>
+
+<ion-footer>
+  <app-role-tab-bar role="rider" />
+</ion-footer>

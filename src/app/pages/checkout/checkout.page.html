@@ -1,0 +1,330 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/cart" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Checkout</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    @if (isEmpty()) {
+      <app-empty-state
+        icon="cart-outline"
+        title="Nothing to check out yet"
+        text="Add a few breakfast favorites to your cart first.">
+        <ion-button routerLink="/products">Browse the menu</ion-button>
+      </app-empty-state>
+    } @else {
+      <!-- 1. Shipping info -->
+      <section class="card">
+        <div class="step-head">
+          <span class="step-num" aria-hidden="true">1</span>
+          <h2 class="section-title">Delivery details</h2>
+        </div>
+
+        <div class="form-stack">
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Full name"
+            labelPlacement="floating"
+            autocomplete="name"
+            [value]="shipping().fullName"
+            [class.ion-invalid]="!!errors()['fullName']"
+            [class.ion-touched]="!!errors()['fullName']"
+            [errorText]="errors()['fullName']"
+            (ionInput)="setShipping('fullName', $event.detail.value ?? '')">
+          </ion-input>
+
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Mobile number"
+            labelPlacement="floating"
+            type="tel"
+            autocomplete="tel"
+            helperText="e.g. 09171234567"
+            [value]="shipping().phone"
+            [class.ion-invalid]="!!errors()['phone']"
+            [class.ion-touched]="!!errors()['phone']"
+            [errorText]="errors()['phone']"
+            (ionInput)="setShipping('phone', $event.detail.value ?? '')">
+          </ion-input>
+
+          @if (savedAddresses().length > 0) {
+            <div class="chip-row" role="group" aria-label="Saved addresses">
+              @for (a of savedAddresses(); track a.id) {
+                <button type="button" class="filter-chip"
+                  [class.is-active]="shipping().address === a.line && shipping().city === a.city"
+                  (click)="useAddress(a.line, a.city)">
+                  {{ a.label }}
+                </button>
+              }
+            </div>
+          }
+
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Street address"
+            labelPlacement="floating"
+            autocomplete="street-address"
+            [value]="shipping().address"
+            [class.ion-invalid]="!!errors()['address']"
+            [class.ion-touched]="!!errors()['address']"
+            [errorText]="errors()['address']"
+            (ionInput)="setShipping('address', $event.detail.value ?? '')">
+          </ion-input>
+
+          <ion-input
+            class="field"
+            fill="outline"
+            label="City / Barangay"
+            labelPlacement="floating"
+            autocomplete="address-level2"
+            [value]="shipping().city"
+            [class.ion-invalid]="!!errors()['city']"
+            [class.ion-touched]="!!errors()['city']"
+            [errorText]="errors()['city']"
+            (ionInput)="setShipping('city', $event.detail.value ?? '')">
+          </ion-input>
+
+          <ion-textarea
+            class="field"
+            fill="outline"
+            label="Delivery notes (optional)"
+            labelPlacement="floating"
+            placeholder="Ring the bell twice, please."
+            [value]="shipping().notes"
+            (ionInput)="setShipping('notes', $event.detail.value ?? '')"
+            [autoGrow]="true"
+            [rows]="2">
+          </ion-textarea>
+        </div>
+      </section>
+
+      <!-- 2. Payment -->
+      <section class="card">
+        <div class="step-head">
+          <span class="step-num" aria-hidden="true">2</span>
+          <h2 class="section-title">Payment method</h2>
+        </div>
+
+        <ion-radio-group [value]="payment()" (ionChange)="selectPayment($event.detail.value)">
+          <ion-list class="option-list" lines="none">
+            @for (method of payments; track method) {
+              <ion-item [class.is-selected]="payment() === method">
+                <ion-icon
+                  slot="start"
+                  aria-hidden="true"
+                  [name]="method === 'GCash' ? 'phone-portrait-outline' : method === 'Cash on Delivery' ? 'cash-outline' : 'card-outline'">
+                </ion-icon>
+                <ion-radio justify="space-between" [value]="method">{{ method }}</ion-radio>
+              </ion-item>
+            }
+          </ion-list>
+        </ion-radio-group>
+
+        @if (needsCardForm()) {
+          <div class="form-stack card-form">
+            <p class="callout">
+              <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+              Payments are simulated. Your card details are not saved and no money is charged.
+            </p>
+
+            <ion-input
+              class="field"
+              fill="outline"
+              label="Card number"
+              labelPlacement="floating"
+              inputmode="numeric"
+              maxlength="19"
+              [value]="cardNumber()"
+              (ionInput)="cardNumber.set($event.detail.value ?? '')">
+            </ion-input>
+
+            <ion-input
+              class="field"
+              fill="outline"
+              label="Name on card"
+              labelPlacement="floating"
+              [value]="cardName()"
+              (ionInput)="cardName.set($event.detail.value ?? '')">
+            </ion-input>
+
+            <div class="form-grid-2">
+              <ion-input
+                class="field"
+                fill="outline"
+                label="Expiry (MM/YY)"
+                labelPlacement="floating"
+                maxlength="5"
+                [value]="cardExpiry()"
+                (ionInput)="cardExpiry.set($event.detail.value ?? '')">
+              </ion-input>
+
+              <ion-input
+                class="field"
+                fill="outline"
+                label="CVC"
+                labelPlacement="floating"
+                inputmode="numeric"
+                maxlength="4"
+                [value]="cardCvc()"
+                (ionInput)="cardCvc.set($event.detail.value ?? '')">
+              </ion-input>
+            </div>
+
+            @if (errors()['card']) {
+              <p class="form-error" role="alert">
+                <ion-icon name="alert-circle" aria-hidden="true"></ion-icon>
+                {{ errors()['card'] }}
+              </p>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- 3. Discounts -->
+      <section class="card">
+        <div class="step-head">
+          <span class="step-num" aria-hidden="true">3</span>
+          <h2 class="section-title">Discounts</h2>
+        </div>
+
+        <div class="promo-row">
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Promo code"
+            labelPlacement="floating"
+            placeholder="Try RISE10 or MUNCH50"
+            [value]="promoInput()"
+            (ionInput)="promoInput.set($event.detail.value ?? '')">
+          </ion-input>
+          <ion-button fill="outline" (click)="applyPromo()">Apply</ion-button>
+        </div>
+
+        @if (promoMessage()) {
+          <p class="promo-message" [class.ok]="appliedPromo() !== ''" role="status">
+            <ion-icon [name]="appliedPromo() !== '' ? 'checkmark-circle' : 'alert-circle'" aria-hidden="true"></ion-icon>
+            {{ promoMessage() }}
+          </p>
+        }
+
+        @if (rewards.voucherTotal() > 0) {
+          <ion-item lines="none" class="voucher">
+            <ion-checkbox
+              justify="space-between"
+              [checked]="useVoucher()"
+              (ionChange)="useVoucher.set($event.detail.checked)">
+              <span class="voucher-label">Use my reward voucher — {{ rewards.voucherTotal() | peso }}</span>
+              <span class="voucher-hint">Bought with points on the Rewards page.</span>
+            </ion-checkbox>
+          </ion-item>
+        }
+      </section>
+
+      <!-- Order summary -->
+      <section class="card">
+        <h2 class="section-title">Order summary</h2>
+
+        <ul class="row-list">
+          @for (item of cart.detailedItems(); track item.product.id) {
+            <li class="row-item">
+              <app-product-image class="thumb thumb--sm" [src]="item.product.image" [name]="item.product.name" [category]="item.product.category" />
+              <div class="row-item__main">
+                <p class="row-item__title">{{ item.product.name }}</p>
+                <p class="row-item__meta">{{ item.quantity }} × {{ item.product.price | peso }}</p>
+              </div>
+              <span class="row-item__value">{{ item.product.price * item.quantity | peso }}</span>
+            </li>
+          }
+        </ul>
+
+        <div class="summary totals">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{ quote().subtotal | peso }}</span>
+          </div>
+
+          @if (quote().promoDiscount > 0) {
+            <div class="summary-row summary-row--discount">
+              <span>Promo ({{ appliedPromo() }})</span>
+              <span>-{{ quote().promoDiscount | peso }}</span>
+            </div>
+          }
+
+          @if (quote().rewardDiscount > 0) {
+            <div class="summary-row summary-row--discount">
+              <span>Reward voucher</span>
+              <span>-{{ quote().rewardDiscount | peso }}</span>
+            </div>
+          }
+
+          <div class="summary-row">
+            <span>Delivery fee</span>
+            @if (quote().deliveryFee === 0) {
+              <span class="text-success">FREE</span>
+            } @else {
+              <span>{{ quote().deliveryFee | peso }}</span>
+            }
+          </div>
+
+          <div class="summary-row summary-row--total">
+            <span>Total</span>
+            <span>{{ quote().total | peso }}</span>
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+</ion-content>
+
+<!-- Sticky place-order bar -->
+@if (!isEmpty()) {
+  <ion-footer class="action-footer">
+    <div class="action-bar">
+      <div class="action-bar__total">
+        <span>Total</span>
+        <strong>{{ quote().total | peso }}</strong>
+      </div>
+      <ion-button (click)="placeOrder()">
+        <ion-icon slot="start" name="checkmark-done-outline" aria-hidden="true"></ion-icon>
+        Place order
+      </ion-button>
+    </div>
+  </ion-footer>
+}
+
+<!-- Simulated payment: spinner, then an animated receipt. Nothing is really charged. -->
+@if (payStage() !== 'idle') {
+  <div class="pay-overlay" role="alertdialog" aria-live="assertive" aria-label="Payment">
+    @if (payStage() === 'processing') {
+      <div class="pay-box">
+        <div class="pay-spinner" aria-hidden="true"></div>
+        <h2>{{ payment() === 'GCash' ? 'Connecting to GCash…' : 'Authorizing your card…' }}</h2>
+        <p class="muted">Please do not close the app.</p>
+      </div>
+    } @else {
+      <div class="pay-box">
+        <svg class="pay-check" viewBox="0 0 52 52" aria-hidden="true">
+          <circle class="pay-check__circle" cx="26" cy="26" r="24" fill="none" />
+          <path class="pay-check__tick" fill="none" d="M14 27l8 8 16-17" />
+        </svg>
+        <h2 class="pay-title">Payment successful</h2>
+
+        <div class="pay-receipt">
+          <p class="pay-receipt__amount">{{ paidAmount() | peso }}</p>
+          <div class="pay-receipt__row"><span>Paid with</span><strong>{{ payment() }}</strong></div>
+          <div class="pay-receipt__row"><span>Reference</span><strong>{{ payRef() }}</strong></div>
+          <div class="pay-receipt__row"><span>Date</span><strong>{{ payTime() | date: 'MMM d, y · h:mm a' }}</strong></div>
+          <div class="pay-receipt__row"><span>Status</span><strong class="text-success">PAID</strong></div>
+        </div>
+        <p class="muted pay-note">Placing your order…</p>
+      </div>
+    }
+  </div>
+}

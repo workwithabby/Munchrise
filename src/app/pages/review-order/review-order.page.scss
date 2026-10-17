@@ -1,0 +1,20 @@
+.review-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.star-picker {
+  display: flex;
+  gap: 6px;
+}
+
+.star-btn {
+  padding: 4px;
+  border: 0;
+  background: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--munch-mustard, #dca93e);
+  cursor: pointer;
+}

@@ -1,0 +1,10 @@
+<div class="empty-state" role="status">
+  <span class="icon-circle icon-circle--lg" aria-hidden="true">
+    <ion-icon [name]="icon()"></ion-icon>
+  </span>
+  <h2 class="empty-state__title">{{ title() }}</h2>
+  @if (text()) {
+    <p class="empty-state__text">{{ text() }}</p>
+  }
+  <div class="empty-state__actions"><ng-content /></div>
+</div>

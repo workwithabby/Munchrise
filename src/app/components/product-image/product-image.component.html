@@ -1,0 +1,30 @@
+@if (useCover()) {
+  <!-- No photo yet: duotone category gradient + line-art food icon -->
+  <div
+    class="cover"
+    role="img"
+    [attr.aria-label]="name()"
+    [style.background]="coverGradient()">
+    <svg
+      class="cover-icon"
+      viewBox="0 0 48 48"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      [innerHTML]="coverIcon()">
+    </svg>
+  </div>
+} @else {
+  @if (!loaded()) {
+    <span class="skeleton" aria-hidden="true"></span>
+  }
+  <img
+    [src]="src()"
+    [alt]="name()"
+    loading="lazy"
+    (load)="onLoad()"
+    (error)="onError()" />
+}

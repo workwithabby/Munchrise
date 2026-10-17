@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Notifications</ion-title>
+
+    @if (notifications.unreadCount() > 0) {
+      <ion-buttons slot="end">
+        <ion-button color="primary" (click)="notifications.markAllRead()">Mark all read</ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page">
+    @if (notifications.items().length === 0) {
+      <app-empty-state
+        icon="notifications-outline"
+        title="Nothing yet"
+        text="Order updates and promos will show up here." />
+    } @else {
+      <ul class="notif-list">
+        @for (n of notifications.items(); track n.id) {
+          <li>
+            <button
+              type="button"
+              class="card notif-item"
+              [class.unread]="!n.read"
+              (click)="markRead(n.id)">
+              <span
+                class="icon-circle"
+                [class.icon-circle--teal]="n.type === 'promo'"
+                [class.icon-circle--warning]="n.type === 'reward'"
+                aria-hidden="true">
+                <ion-icon [name]="iconFor(n.type)"></ion-icon>
+              </span>
+
+              <span class="notif-body">
+                <span class="notif-head">
+                  <span class="notif-title">{{ n.title }}</span>
+                  <time class="notif-date">{{ n.createdAt | date: 'MMM d, h:mm a' }}</time>
+                </span>
+                <span class="notif-message">{{ n.message }}</span>
+              </span>
+
+              @if (!n.read) {
+                <span class="unread-dot"><span class="sr-only">Unread</span></span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</ion-content>

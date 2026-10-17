@@ -1,0 +1,10 @@
+/* Login — brand block, fields and buttons come from global.scss */
+
+.forgot-link {
+  align-self: flex-end;
+  padding: 4px 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--munch-orange);
+  text-decoration: underline;
+}

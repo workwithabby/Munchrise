@@ -1,0 +1,179 @@
+/* Verify email — six code boxes over one real input (so paste and SMS/email autofill work) */
+.verify {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.verify__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--space-4);
+  text-align: center;
+
+  h1 {
+    margin: var(--space-4) 0 var(--space-2);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.verify__email {
+  margin-top: var(--space-1) !important;
+  font-weight: 700;
+  color: var(--munch-brown);
+  word-break: break-all;
+}
+
+.verify__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--munch-radius-lg);
+  background: var(--munch-white);
+  box-shadow: var(--shadow-md);
+}
+
+.verify__label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-muted-text);
+}
+
+.otp {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(6px, 2vw, 10px);
+  cursor: text;
+}
+
+.otp__box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1.2;
+  min-height: 52px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--munch-cream);
+  font-family: var(--munch-font-heading);
+  font-size: clamp(24px, 8vw, 32px);
+  line-height: 1;
+  color: var(--munch-brown);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.otp__box--filled {
+  border-color: var(--munch-mustard);
+  background: var(--munch-white);
+  transform: translateY(-1px);
+}
+
+.otp__box--active {
+  border-color: var(--munch-orange);
+  background: var(--munch-white);
+  box-shadow: 0 0 0 4px rgba(200, 72, 26, 0.15);
+
+  /* blinking caret in the empty box that is next */
+  &::after {
+    content: '';
+    width: 2px;
+    height: 44%;
+    background: var(--munch-orange);
+    animation: otp-caret 1s steps(1) infinite;
+  }
+}
+
+.otp--error .otp__box {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+  animation: otp-shake 0.35s ease;
+}
+
+/* The real input sits invisibly over the boxes: it receives taps, paste and autofill */
+.otp__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px; /* 16px stops iOS zooming in on focus */
+  caret-color: transparent;
+}
+
+.verify__resend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 15px;
+}
+
+.verify__timer {
+  font-weight: 600;
+  color: var(--color-muted-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.verify__sending {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  ion-spinner {
+    width: 18px;
+    height: 18px;
+    color: var(--munch-orange);
+  }
+}
+
+.verify__link {
+  padding: 8px 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--munch-orange);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@keyframes otp-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes otp-shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .otp__box,
+  .otp--error .otp__box,
+  .otp__box--active::after {
+    animation: none;
+    transition: none;
+  }
+}

@@ -1,0 +1,87 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="isReset ? '/forgot-password' : '/signup'" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title class="nav-title">
+      <span class="nav-brand">Munch<span>rise</span></span>
+    </ion-title>
+    <span slot="end" class="nav-page">{{ isReset ? 'Reset' : 'Verify' }}</span>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--narrow verify">
+    <div class="verify__hero">
+      <img class="brand-logo" src="assets/logo/munchrise-logo.png" alt="Munchrise" width="200" height="120" />
+      <h1>Check your email</h1>
+      <p class="muted">We sent a 6-digit code to</p>
+      <p class="verify__email">{{ maskedEmail() }}</p>
+    </div>
+
+    <form class="verify__card" (submit)="$event.preventDefault(); verify()">
+      <label class="verify__label" for="otp-input">Enter your code</label>
+
+      <div class="otp" [class.otp--error]="formError()" (click)="focusInput()">
+        @for (digit of boxes(); track $index) {
+          <span
+            class="otp__box"
+            [class.otp__box--filled]="digit"
+            [class.otp__box--active]="focused() && activeBox() === $index"
+            aria-hidden="true">
+            {{ digit }}
+          </span>
+        }
+        <input
+          #codeInput
+          id="otp-input"
+          class="otp__input"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="one-time-code"
+          enterkeyhint="done"
+          maxlength="12"
+          aria-label="6-digit verification code"
+          [value]="code()"
+          (input)="onCodeInput($any($event.target).value)"
+          (focus)="focused.set(true)"
+          (blur)="focused.set(false)" />
+      </div>
+
+      @if (formError()) {
+        <p class="form-error" role="alert">
+          <ion-icon name="alert-circle" aria-hidden="true"></ion-icon>
+          {{ formError() }}
+        </p>
+      }
+
+      <ion-button expand="block" type="submit" [disabled]="busy() || code().length !== 6">
+        @if (busy()) {
+          Verifying…
+        } @else {
+          {{ isReset ? 'Verify code' : 'Verify and continue' }}
+        }
+      </ion-button>
+    </form>
+
+    <div class="verify__resend">
+      <span class="muted">Didn't get it?</span>
+      @if (resending()) {
+        <span class="verify__timer verify__sending" role="status">
+          <ion-spinner name="crescent"></ion-spinner>
+          Sending a new code…
+        </span>
+      } @else if (cooldown() > 0) {
+        <span class="verify__timer">Resend in {{ cooldownText() }}</span>
+      } @else {
+        <button type="button" class="verify__link" (click)="resend()">Resend code</button>
+      }
+    </div>
+
+    <p class="callout">
+      <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+      Check your spam folder too. Wrong email? <a [routerLink]="isReset ? '/forgot-password' : '/signup'" class="verify__link">Start over</a>
+    </p>
+  </div>
+</ion-content>

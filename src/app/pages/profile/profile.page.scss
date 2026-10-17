@@ -1,0 +1,50 @@
+/* Profile — cards, rows and fields come from global.scss */
+.avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--munch-white);
+  box-shadow: var(--shadow-md);
+  background: var(--surface-muted);
+}
+
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--munch-font-heading);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--munch-orange);
+}
+
+.profile-name {
+  font-size: var(--text-xl);
+}
+
+.photo-button {
+  margin-top: var(--space-2);
+}
+
+.photo-button input {
+  display: none;
+}
+
+/* "+ Add" text button in a section header */
+.link-button {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.sub-form {
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}

@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Developers</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    <section class="intro">
+      <span class="intro__eyebrow">IT31S6 · Team Munchrise</span>
+      <h1>Meet the team</h1>
+      <p>The five students who cooked up Munchrise, one breakfast at a time.</p>
+    </section>
+
+    <div class="team-grid">
+      @for (member of members; track member.name) {
+        <article class="member-card" [class.leader]="member.role === 'Group Leader'">
+          <span class="avatar" [style.background]="avatarGradient($index)" aria-hidden="true">{{ initials(member.name) }}</span>
+          <p class="member-name">{{ displayName(member.name) }}</p>
+          <span class="role" [class.role--leader]="member.role === 'Group Leader'">
+            @if (member.role === 'Group Leader') {
+              <ion-icon name="ribbon" aria-hidden="true"></ion-icon>
+            }
+            {{ member.role }}
+          </span>
+          <!-- keeps the original "Surname, Given" name available to screen readers and search -->
+          <span class="sr-only">{{ member.name }}</span>
+        </article>
+      }
+    </div>
+
+    <section class="card class-card">
+      <h2 class="section-title">Class details</h2>
+      <ul class="class-list">
+        @for (line of infoLines; track line; let i = $index) {
+          <li class="class-line">
+            <span class="class-line__icon" aria-hidden="true"><ion-icon [name]="infoIcons[i] ?? 'information-circle-outline'"></ion-icon></span>
+            <span>{{ line }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <p class="muted thanks">Thank you for trying Munchrise — "Rise, Munch, Repeat!"</p>
+  </div>
+</ion-content>

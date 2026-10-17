@@ -1,0 +1,137 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/orders" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Track order</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    @if (order(); as o) {
+      <!-- Live scene: kitchen -> rider -> your door -->
+      <section class="card scene" [class.is-delivered]="delivered()" aria-live="polite">
+        <div class="scene__top">
+          <div>
+            <p class="scene__eyebrow">
+              @if (!delivered() && !cancelled()) { <span class="live-dot" aria-hidden="true"></span> Live } @else { Done }
+              · {{ o.id }}
+            </p>
+            <h1 class="scene__title">{{ headline() }}</h1>
+            @if (o.riderName && status() === 'Out for Delivery') {
+              <p class="scene__hint"><ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon> Your rider: {{ o.riderName }}</p>
+            }
+          </div>
+          <div class="eta">
+            <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+            <span>{{ eta() }}</span>
+          </div>
+        </div>
+
+        @if (cancelled()) {
+          <p class="scene__hint">
+            <ion-icon name="close-circle-outline" aria-hidden="true"></ion-icon>
+            {{ o.cancelledBy === 'admin' ? 'Cancelled by the store' : 'You cancelled this order' }}{{ o.cancelReason ? ': ' + o.cancelReason : '' }}.
+            {{ o.paymentRef ? 'Your payment will be refunded.' : '' }}
+          </p>
+        } @else {
+        <div class="route" [style.--p]="riderPosition()" aria-hidden="true">
+          <span class="route__stop route__stop--start"><ion-icon name="restaurant-outline"></ion-icon></span>
+          <span class="route__line"><span class="route__done"></span></span>
+          <span class="route__stop route__stop--end" [class.is-reached]="delivered()"><ion-icon name="home-outline"></ion-icon></span>
+          <span class="rider" [class.is-riding]="status() === 'Out for Delivery'" [class.is-cooking]="status() === 'Preparing'">
+            <ion-icon [name]="delivered() ? 'checkmark-circle' : status() === 'Out for Delivery' ? 'bicycle-outline' : 'restaurant-outline'"></ion-icon>
+          </span>
+        </div>
+
+        }
+
+        @if (!delivered() && !cancelled()) {
+          <div class="scene__actions">
+            <span class="scene__hint"><ion-icon name="radio-outline" aria-hidden="true"></ion-icon> Live: this updates when the kitchen changes your order status.</span>
+          </div>
+        }
+      </section>
+
+      @if (canCancel()) {
+        <ion-button expand="block" fill="outline" color="danger" (click)="cancel()">Cancel order</ion-button>
+      }
+
+      <!-- Timeline -->
+      @if (!cancelled()) {
+      <section class="card">
+        <h2 class="section-title">Order status</h2>
+        <ol class="timeline" [style.--fill]="lineFill()">
+          @for (step of steps; track step.status; let i = $index) {
+            <li class="tl-step"
+              [class.is-done]="i < stepIndex() || (i === stepIndex() && delivered())"
+              [class.is-current]="i === stepIndex() && !delivered()"
+              [class.is-todo]="i > stepIndex()"
+              [attr.aria-current]="i === stepIndex() ? 'step' : null">
+              <span class="tl-step__icon"><ion-icon [name]="step.icon" aria-hidden="true"></ion-icon></span>
+              <div class="tl-step__body">
+                <p class="tl-step__title">{{ step.title }}</p>
+                <p class="tl-step__text">{{ step.text }}</p>
+                @if (timeFor(step.status); as at) {
+                  <p class="tl-step__time num">{{ at | date: 'MMM d · h:mm a' }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ol>
+      </section>
+
+      }
+
+      <!-- Details -->
+      <section class="card">
+        <h2 class="section-title">Your order</h2>
+        <ul class="plain-list">
+          @for (line of o.items; track line.productId) {
+            <li class="plain-row">
+              <span class="plain-row__name">{{ line.quantity }}× {{ line.name }}</span>
+              <span class="num">{{ line.price * line.quantity | peso }}</span>
+            </li>
+          }
+          <li class="plain-row plain-row--total">
+            <span class="plain-row__name">Total ({{ itemCount() }} {{ itemCount() === 1 ? 'item' : 'items' }})</span>
+            <strong class="num">{{ o.total | peso }}</strong>
+          </li>
+        </ul>
+        <ul class="row-list detail-rows">
+          <li class="row-item">
+            <span class="icon-circle" aria-hidden="true"><ion-icon name="location-outline"></ion-icon></span>
+            <div class="row-item__main">
+              <p class="row-item__meta">Deliver to</p>
+              <p class="row-item__title">{{ o.shipping.fullName }}</p>
+              <p class="row-item__meta">{{ o.shipping.address }}, {{ o.shipping.city }} · {{ o.shipping.phone }}</p>
+            </div>
+          </li>
+          <li class="row-item">
+            <span class="icon-circle" aria-hidden="true"><ion-icon name="wallet-outline"></ion-icon></span>
+            <div class="row-item__main">
+              <p class="row-item__meta">Payment</p>
+              <p class="row-item__title">{{ o.payment }} · {{ o.payment === 'Cash on Delivery' ? 'Pay the rider in cash' : 'Paid' }}</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <div class="btn-stack">
+        @if (o.status === 'Delivered') {
+          <ion-button expand="block" [routerLink]="['/review-order', o.id]">
+            <ion-icon slot="start" name="star-outline" aria-hidden="true"></ion-icon>
+            Rate products &amp; rider
+          </ion-button>
+        }
+        <ion-button expand="block" fill="outline" [routerLink]="['/order-confirmation', o.id]">View receipt</ion-button>
+        <ion-button expand="block" fill="clear" color="dark" routerLink="/orders">All my orders</ion-button>
+      </div>
+    } @else {
+      <app-empty-state icon="receipt-outline" title="Order not found" text="We could not find that order number.">
+        <ion-button routerLink="/orders">Go to my orders</ion-button>
+      </app-empty-state>
+    }
+  </div>
+</ion-content>

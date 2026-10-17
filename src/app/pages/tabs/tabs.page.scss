@@ -1,0 +1,12 @@
+/* Bottom tab bar lives inside <ion-tabs>; global styling is in global.scss
+   (§17) so the frosted surface, safe-area padding and badge are shared.
+   Only tab-button positioning tweaks live here. */
+
+ion-tab-button {
+  position: relative;
+}
+
+/* Reinforce the selected color (in addition to Ionic's --color-selected). */
+ion-tab-button.is-selected {
+  --color: var(--munch-orange);
+}

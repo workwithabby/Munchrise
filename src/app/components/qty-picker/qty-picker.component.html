@@ -1,0 +1,11 @@
+<div class="qty-picker" role="group" aria-label="Quantity">
+  <button type="button" class="step" [disabled]="!canDecrease()" (click)="decrease()" aria-label="Decrease quantity">
+    <ion-icon name="remove" aria-hidden="true"></ion-icon>
+  </button>
+
+  <span class="qty-value" aria-live="polite">{{ value() }}</span>
+
+  <button type="button" class="step" [disabled]="!canIncrease()" (click)="increase()" aria-label="Increase quantity">
+    <ion-icon name="add" aria-hidden="true"></ion-icon>
+  </button>
+</div>

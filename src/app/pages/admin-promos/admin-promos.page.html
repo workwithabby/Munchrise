@@ -1,0 +1,122 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Promo codes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack">
+    <!-- Create -->
+    <section class="card form-stack">
+      <div class="section-head">
+        <h2 class="section-title">Create a promo code</h2>
+        <span class="count">{{ activeCount() }} live</span>
+      </div>
+
+      <ion-input
+        class="field"
+        fill="outline"
+        label="Code"
+        labelPlacement="floating"
+        placeholder="e.g. SUNRISE20"
+        autocapitalize="characters"
+        maxlength="20"
+        helperText="Letters and numbers only. Customers type this at checkout."
+        [value]="code()"
+        (ionInput)="code.set(($event.detail.value ?? '').toUpperCase().replace(' ', ''))">
+      </ion-input>
+
+      <div class="form-grid-2">
+        <ion-select
+          class="field"
+          fill="outline"
+          label="Discount type"
+          labelPlacement="floating"
+          interface="popover"
+          [value]="type()"
+          (ionChange)="type.set($event.detail.value)">
+          <ion-select-option value="percent">Percent (%)</ion-select-option>
+          <ion-select-option value="fixed">Fixed amount (₱)</ion-select-option>
+        </ion-select>
+
+        <ion-input
+          class="field"
+          fill="outline"
+          type="number"
+          inputmode="decimal"
+          [label]="type() === 'percent' ? 'Percent off' : 'Peso off'"
+          labelPlacement="floating"
+          [value]="value()"
+          (ionInput)="value.set($event.detail.value ?? '')">
+        </ion-input>
+      </div>
+
+      <ion-input
+        class="field"
+        fill="outline"
+        type="number"
+        inputmode="decimal"
+        label="Minimum order in ₱ (optional)"
+        labelPlacement="floating"
+        [value]="minSubtotal()"
+        (ionInput)="minSubtotal.set($event.detail.value ?? '')">
+      </ion-input>
+
+      <ion-input
+        class="field"
+        fill="outline"
+        label="Description (optional)"
+        labelPlacement="floating"
+        placeholder="Shown on the deal card"
+        [value]="description()"
+        (ionInput)="description.set($event.detail.value ?? '')">
+      </ion-input>
+
+      @if (preview()) {
+        <p class="preview"><ion-icon name="eye-outline" aria-hidden="true"></ion-icon> Customers will see: <strong>{{ preview() }}</strong></p>
+      }
+
+      @if (error()) {
+        <p class="form-error"><ion-icon name="alert-circle" aria-hidden="true"></ion-icon> {{ error() }}</p>
+      }
+
+      <ion-button expand="block" [disabled]="saving()" (click)="create()">
+        <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
+        Create code
+      </ion-button>
+    </section>
+
+    <!-- List -->
+    @if (promos().length === 0) {
+      <app-empty-state icon="pricetags-outline" title="No promo codes yet" text="Create one above and customers will see it on their Home screen." />
+    } @else {
+      <ul class="promo-list">
+        @for (promo of promos(); track promo.code) {
+          <li class="card promo" [class.is-off]="promo.active === false">
+            <div class="promo__main">
+              <span class="promo__code">{{ promo.code }}</span>
+              <p class="promo__desc">{{ promo.description }}</p>
+              <p class="row-item__meta">{{ details(promo) }}</p>
+            </div>
+            <div class="promo__actions">
+              <ion-toggle
+                [checked]="promo.active !== false"
+                [attr.aria-label]="'Turn ' + promo.code + (promo.active !== false ? ' off' : ' on')"
+                (ionChange)="setActive(promo, !!$event.detail.checked)"></ion-toggle>
+              <ion-button fill="clear" color="danger" [attr.aria-label]="'Delete ' + promo.code" (click)="askDelete(promo)">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</ion-content>
+
+<ion-footer>
+  <app-role-tab-bar role="admin" />
+</ion-footer>

@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>My profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--narrow stack">
+    <section class="card form-stack">
+      <ion-input class="field" label="Full name" labelPlacement="floating" fill="outline"
+        [value]="name()" (ionInput)="name.set($event.detail.value ?? '')"></ion-input>
+      <ion-input class="field" label="Phone" labelPlacement="floating" fill="outline" type="tel"
+        [value]="phone()" (ionInput)="phone.set($event.detail.value ?? '')"></ion-input>
+      <ion-select class="field" label="Vehicle" labelPlacement="floating" fill="outline" interface="popover"
+        [value]="vehicle()" (ionChange)="vehicle.set($event.detail.value)">
+        @for (v of vehicles; track v) {
+          <ion-select-option [value]="v">{{ v }}</ion-select-option>
+        }
+      </ion-select>
+      <ion-input class="field" label="Plate number (optional)" labelPlacement="floating" fill="outline"
+        [value]="plate()" (ionInput)="plate.set($event.detail.value ?? '')"></ion-input>
+
+      @if (error()) {
+        <p class="form-error"><ion-icon name="alert-circle" aria-hidden="true"></ion-icon> {{ error() }}</p>
+      }
+      <ion-button expand="block" (click)="save()">Save changes</ion-button>
+    </section>
+
+    <section class="card">
+      <ion-toggle justify="space-between" [checked]="rider.online()"
+        (ionChange)="rider.setOnline(!!$event.detail.checked)">Available for orders</ion-toggle>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">My ratings</h2>
+      @if (ratings.mine().length === 0) {
+        <p class="muted">No ratings yet. Customers can rate you after a delivery.</p>
+      } @else {
+        <p><strong>{{ ratings.average().toFixed(1) }}</strong> / 5 from {{ ratings.mine().length }} {{ ratings.mine().length === 1 ? 'rating' : 'ratings' }}</p>
+        <ul class="row-list">
+          @for (r of ratings.mine().slice(0, 10); track r.id) {
+            <li class="row-item">
+              <div class="row-item__main">
+                <p class="row-item__title">
+                  @for (s of stars; track s) {<ion-icon [name]="s <= r.rating ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>}
+                  <span class="muted"> {{ r.author }} · {{ r.createdAt | date: 'MMM d' }}</span>
+                </p>
+                @if (r.comment) { <p class="row-item__meta">{{ r.comment }}</p> }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <app-role-tab-bar role="rider" />
+</ion-footer>

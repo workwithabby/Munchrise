@@ -1,0 +1,10 @@
+<ion-button
+  class="cart-button"
+  (click)="openDrawer()"
+  [attr.aria-label]="cart.count() > 0 ? 'Open cart, ' + cart.count() + ' items' : 'Open cart'"
+  aria-haspopup="dialog">
+  <ion-icon slot="icon-only" name="cart-outline"></ion-icon>
+  @if (cart.count() > 0) {
+    <ion-badge class="cart-badge" color="primary" aria-hidden="true">{{ cart.count() }}</ion-badge>
+  }
+</ion-button>

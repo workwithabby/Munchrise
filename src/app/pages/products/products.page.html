@@ -1,0 +1,170 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>List of Products</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+      <app-cart-button />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide page--tabs">
+    <!-- Search + filter toggle -->
+    <div class="search-row">
+      <ion-searchbar
+        class="search"
+        placeholder="Search the menu..."
+        [debounce]="300"
+        (ionInput)="onSearch($event)"
+        showCancelButton="never">
+      </ion-searchbar>
+
+      <button
+        type="button"
+        class="icon-button filter-toggle"
+        [class.is-on]="showFilters() || hasActiveFilters()"
+        (click)="toggleFilters()"
+        [attr.aria-expanded]="showFilters()"
+        aria-label="Filters">
+        <ion-icon name="options-outline" aria-hidden="true"></ion-icon>
+        @if (activeFilterCount() > 0) {
+          <span class="filter-dot" aria-hidden="true">{{ activeFilterCount() }}</span>
+        }
+      </button>
+    </div>
+
+    <!-- Category chips -->
+    <div class="chip-row" role="group" aria-label="Categories">
+      @for (item of categories; track item) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.is-active]="selectedCategory() === item"
+          [attr.aria-pressed]="selectedCategory() === item"
+          (click)="selectCategory(item, $event)">
+          {{ item }}
+          <span class="chip-count">{{ categoryCounts()[item] }}</span>
+        </button>
+      }
+    </div>
+
+    @if (showFilters()) {
+      <div class="card filters-panel">
+        <div class="filter-group">
+          <p class="filter-label">Sort by</p>
+          <ion-select
+            class="field"
+            fill="outline"
+            aria-label="Sort by"
+            [value]="sort()"
+            (ionChange)="onSortChange($event)"
+            interface="popover">
+            @for (option of sortOptions; track option.value) {
+              <ion-select-option [value]="option.value">{{ option.label }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="filter-group">
+          <p class="filter-label">
+            Price range
+            <span class="num">{{ minPrice() | peso }} – {{ maxPrice() | peso }}</span>
+          </p>
+          <ion-range
+            aria-label="Price range"
+            [min]="priceRange.min"
+            [max]="priceRange.max"
+            [dualKnobs]="true"
+            [value]="{ lower: minPrice(), upper: maxPrice() }"
+            (ionChange)="onPriceChange($event)">
+          </ion-range>
+        </div>
+
+        <div class="filter-group">
+          <p class="filter-label">Dietary</p>
+          <div class="chip-row chip-row--wrap">
+            @for (tag of dietaryTags; track tag) {
+              <button
+                type="button"
+                class="filter-chip"
+                [class.is-active]="dietary().includes(tag)"
+                [attr.aria-pressed]="dietary().includes(tag)"
+                (click)="toggleDietary(tag)">
+                {{ tag }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <p class="filter-label">Minimum rating</p>
+          <div class="chip-row chip-row--wrap">
+            @for (r of ratingOptions; track r) {
+              <button
+                type="button"
+                class="filter-chip"
+                [class.is-active]="minRating() === r || (r === 0 && minRating() === 0)"
+                (click)="r === 0 ? minRating.set(0) : setMinRating(r)">
+                {{ r === 0 ? 'Any' : r + '★ & up' }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <p class="filter-label">Availability</p>
+          <div class="chip-row chip-row--wrap">
+            <button
+              type="button"
+              class="filter-chip"
+              [class.is-active]="inStockOnly()"
+              [attr.aria-pressed]="inStockOnly()"
+              (click)="toggleInStock()">
+              In stock only
+            </button>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <ion-button fill="outline" color="medium" (click)="clearFilters()">Reset</ion-button>
+          <ion-button (click)="toggleFilters()">Show {{ results().length }} items</ion-button>
+        </div>
+      </div>
+    }
+
+    <!-- Quick sort (same value as the panel) -->
+    <div class="chip-row sort-row" role="group" aria-label="Sort">
+      @for (option of sortOptions; track option.value) {
+        <button
+          type="button"
+          class="filter-chip filter-chip--sm"
+          [class.is-active]="sort() === option.value"
+          (click)="sort.set(option.value)">
+          {{ option.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Results -->
+    <p class="result-count">{{ results().length }} {{ results().length === 1 ? 'item' : 'items' }}</p>
+
+    @if (results().length === 0) {
+      <app-empty-state
+        icon="search-outline"
+        title="Nothing matches"
+        text="Try a different search or reset the filters.">
+        <ion-button fill="outline" (click)="clearFilters()">Reset filters</ion-button>
+      </app-empty-state>
+    } @else {
+      <div class="product-grid">
+        @for (product of results(); track product.id) {
+          <app-product-card [product]="product" />
+        }
+      </div>
+    }
+  </div>
+</ion-content>

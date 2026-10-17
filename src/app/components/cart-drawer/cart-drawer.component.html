@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Your cart @if (cart.count() > 0) { <span class="count">({{ cart.count() }})</span> }</ion-title>
+    <ion-buttons slot="end">
+      <ion-button aria-label="Open full cart page" (click)="go('/cart')">
+        <ion-icon slot="icon-only" name="expand-outline"></ion-icon>
+      </ion-button>
+      <ion-button aria-label="Close cart" (click)="close()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (cart.detailedItems().length === 0) {
+    <app-empty-state icon="cart-outline" title="Your cart is empty" text="Add a few breakfast favorites to get started.">
+      <ion-button (click)="go('/products')">Browse the menu</ion-button>
+    </app-empty-state>
+  } @else {
+    <ul class="lines">
+      @for (item of cart.detailedItems(); track item.product.id) {
+        <li class="line">
+          <app-product-image class="thumb" [src]="item.product.image" [name]="item.product.name" [category]="item.product.category" />
+          <div class="line__body">
+            <p class="line__name">{{ item.product.name }}</p>
+            <p class="line__price num">{{ item.product.price | peso }}</p>
+            <div class="line__bottom">
+              <app-qty-picker [value]="item.quantity" [max]="item.product.stock" (valueChange)="setQuantity(item.product.id, $event)" />
+              <button type="button" class="line__remove" [attr.aria-label]="'Remove ' + item.product.name" (click)="cart.remove(item.product.id)">
+                <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</ion-content>
+
+@if (cart.detailedItems().length > 0) {
+  <ion-footer>
+    <div class="foot">
+      <div class="foot__total">
+        <span>Subtotal</span>
+        <strong class="num">{{ cart.subtotal() | peso }}</strong>
+      </div>
+      <ion-button expand="block" (click)="go('/checkout')">Checkout</ion-button>
+      <ion-button expand="block" fill="outline" (click)="go('/cart')">View full cart</ion-button>
+    </div>
+  </ion-footer>
+}

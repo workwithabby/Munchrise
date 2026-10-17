@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Order History</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack page--tabs">
+    @if (history().length > 0) {
+      <div class="chip-row" role="group" aria-label="Show orders">
+        @for (option of filters; track option.value) {
+          <button type="button" class="filter-chip" [class.is-active]="filter() === option.value"
+            [attr.aria-pressed]="filter() === option.value" (click)="filter.set(option.value)">
+            {{ option.label }}
+            <span class="chip-count">{{ countFor(option.value) }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    @if (history().length === 0) {
+      <app-empty-state
+        icon="receipt-outline"
+        title="No orders yet"
+        text="Your breakfast history will show up here.">
+        <ion-button routerLink="/products">Order something tasty</ion-button>
+      </app-empty-state>
+    } @else {
+      @for (order of visible(); track order.id) {
+        <article class="card order-card">
+          <div class="order-head">
+            <div>
+              <p class="order-number">{{ order.id }}</p>
+              <p class="row-item__meta">{{ order.placedAt | date: 'MMM d, y · h:mm a' }}</p>
+            </div>
+            <span class="pill status-pill" [attr.data-status]="order.status">{{ order.status }}</span>
+          </div>
+
+          @if (order.status === 'Cancelled') {
+            <p class="row-item__meta">Cancelled{{ order.cancelledBy === 'admin' ? ' by the store' : '' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}</p>
+          } @else {
+            <app-order-progress [status]="order.status" />
+          }
+
+          <div class="order-thumbs">
+            @for (line of order.items.slice(0, 4); track line.productId) {
+              <app-product-image class="thumb" [src]="imageFor(line)" [name]="line.name" [category]="categoryFor(line)" />
+            }
+          </div>
+
+          <p class="order-summary">
+            {{ itemCount(order) }} {{ itemCount(order) === 1 ? 'item' : 'items' }} ·
+            {{ order.items[0]?.name }}{{ order.items.length > 1 ? ' + ' + (order.items.length - 1) + ' more' : '' }}
+          </p>
+
+          <div class="order-foot">
+            <span class="order-total num">{{ order.total | peso }}</span>
+            <div class="btn-row">
+              <ion-button size="small" fill="clear" [routerLink]="['/order-confirmation', order.id]">
+                <ion-icon slot="start" name="receipt-outline" aria-hidden="true"></ion-icon>
+                Receipt
+              </ion-button>
+              @if (canCancel(order)) {
+                <ion-button size="small" fill="clear" color="danger" (click)="cancel(order)">Cancel</ion-button>
+              }
+              @if (order.status === 'Delivered') {
+                <ion-button size="small" fill="outline" [routerLink]="['/review-order', order.id]">
+                  <ion-icon slot="start" name="star-outline" aria-hidden="true"></ion-icon>
+                  Rate
+                </ion-button>
+              }
+              @if (order.status !== 'Delivered' && order.status !== 'Cancelled') {
+                <ion-button size="small" [routerLink]="['/track', order.id]">
+                  <ion-icon slot="start" name="bicycle-outline" aria-hidden="true"></ion-icon>
+                  Track
+                </ion-button>
+              }
+              <ion-button size="small" [fill]="order.status === 'Delivered' ? 'solid' : 'outline'" (click)="reorder(order)">
+                <ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon>
+                Reorder
+              </ion-button>
+            </div>
+          </div>
+        </article>
+      }
+    }
+
+    @if (history().length > 0 && visible().length === 0) {
+      <app-empty-state icon="receipt-outline" title="Nothing here" text="No orders in this list yet." />
+    }
+  </div>
+</ion-content>

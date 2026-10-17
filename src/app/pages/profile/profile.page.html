@@ -1,0 +1,274 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Profile</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack page--tabs">
+    @if (!auth.user()) {
+      <!-- Logged out -->
+      <app-empty-state
+        icon="person-outline"
+        title="You are logged out"
+        text="Log in to see your profile, addresses and rewards.">
+        <ion-button routerLink="/login">Login</ion-button>
+        <ion-button fill="outline" routerLink="/signup">Create an account</ion-button>
+      </app-empty-state>
+    } @else {
+      <!-- Avatar + photo picker -->
+      <div class="brand-block">
+        @if (avatarUrl() && !avatarFailed()) {
+          <img class="avatar" [src]="avatarUrl()" alt="Profile photo" (error)="avatarFailed.set(true)" />
+        } @else {
+          <div class="avatar avatar-fallback" aria-hidden="true">{{ initials() }}</div>
+        }
+        <h1 class="profile-name">{{ auth.displayName() }}</h1>
+        <p class="muted">{{ auth.user()?.email }}</p>
+
+        <label class="soft-button photo-button">
+          <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
+          Change photo
+          <input type="file" accept="image/*" (change)="pickPhoto($event)" />
+        </label>
+      </div>
+
+      @if (auth.isGuest()) {
+        <p class="callout">
+          <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+          You are browsing as a guest — sign up to keep your data.
+        </p>
+      }
+
+      <!-- Contact info -->
+      <section class="card">
+        <h2 class="section-title">My information</h2>
+
+        <div class="form-stack">
+          <div class="form-grid-2">
+            <ion-input
+              class="field"
+              fill="outline"
+              label="First name"
+              labelPlacement="floating"
+              autocomplete="given-name"
+              [value]="firstName()"
+              (ionInput)="firstName.set($event.detail.value ?? '')">
+            </ion-input>
+
+            <ion-input
+              class="field"
+              fill="outline"
+              label="Surname"
+              labelPlacement="floating"
+              autocomplete="family-name"
+              [value]="lastName()"
+              (ionInput)="lastName.set($event.detail.value ?? '')">
+            </ion-input>
+          </div>
+
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Email"
+            labelPlacement="floating"
+            [value]="auth.user()?.email"
+            [readonly]="true"
+            helperText="Email can't be changed here">
+          </ion-input>
+
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Mobile number"
+            labelPlacement="floating"
+            type="tel"
+            autocomplete="tel"
+            [value]="phone()"
+            (ionInput)="phone.set($event.detail.value ?? '')">
+          </ion-input>
+
+          <ion-button expand="block" (click)="saveProfile()">Save changes</ion-button>
+        </div>
+      </section>
+
+      <!-- Saved addresses -->
+      <section class="card">
+        <div class="section-head">
+          <h2 class="section-title">Saved addresses</h2>
+          @if (!showAddressForm()) {
+            <button type="button" class="section-link link-button" (click)="showAddressForm.set(true)">
+              + Add
+            </button>
+          }
+        </div>
+
+        @if (addresses().length > 0) {
+          <ul class="row-list">
+            @for (address of addresses(); track address.id) {
+              <li class="row-item">
+                <span class="icon-circle" aria-hidden="true">
+                  <ion-icon
+                    [name]="address.label === 'Work' ? 'briefcase-outline' : address.label === 'School' ? 'school-outline' : 'home-outline'">
+                  </ion-icon>
+                </span>
+                <div class="row-item__main">
+                  <p class="row-item__title">{{ address.label }}</p>
+                  <p class="row-item__meta">{{ address.line }}, {{ address.city }}</p>
+                </div>
+                <button
+                  type="button"
+                  class="icon-button icon-button--danger"
+                  (click)="auth.removeAddress(address.id)"
+                  [attr.aria-label]="'Remove ' + address.label + ' address'">
+                  <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else if (!showAddressForm()) {
+          <p class="muted hint">No saved addresses yet.</p>
+        }
+
+        @if (showAddressForm()) {
+          <div class="form-stack sub-form">
+            <ion-select
+              class="field"
+              fill="outline"
+              label="Label"
+              labelPlacement="floating"
+              interface="popover"
+              [value]="newAddressLabel()"
+              (ionChange)="newAddressLabel.set($event.detail.value)">
+              <ion-select-option value="Home">Home</ion-select-option>
+              <ion-select-option value="Work">Work</ion-select-option>
+              <ion-select-option value="School">School</ion-select-option>
+            </ion-select>
+
+            <ion-input
+              class="field"
+              fill="outline"
+              label="Street address"
+              labelPlacement="floating"
+              autocomplete="street-address"
+              [value]="newAddressLine()"
+              (ionInput)="newAddressLine.set($event.detail.value ?? '')">
+            </ion-input>
+
+            <ion-input
+              class="field"
+              fill="outline"
+              label="City / Barangay"
+              labelPlacement="floating"
+              autocomplete="address-level2"
+              [value]="newAddressCity()"
+              (ionInput)="newAddressCity.set($event.detail.value ?? '')">
+            </ion-input>
+
+            <div class="btn-row">
+              <ion-button fill="outline" color="medium" (click)="showAddressForm.set(false)">Cancel</ion-button>
+              <ion-button (click)="addAddress()">Save address</ion-button>
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Saved payment methods -->
+      <section class="card">
+        <div class="section-head">
+          <h2 class="section-title">Payment methods</h2>
+          @if (!showPaymentForm()) {
+            <button type="button" class="section-link link-button" (click)="showPaymentForm.set(true)">
+              + Add
+            </button>
+          }
+        </div>
+
+        @if (payments().length > 0) {
+          <ul class="row-list">
+            @for (payment of payments(); track payment.id) {
+              <li class="row-item">
+                <span class="icon-circle icon-circle--teal" aria-hidden="true">
+                  <ion-icon [name]="payment.type === 'Card' ? 'card-outline' : 'phone-portrait-outline'"></ion-icon>
+                </span>
+                <div class="row-item__main">
+                  <p class="row-item__title">{{ payment.label }}</p>
+                  <p class="row-item__meta">{{ payment.masked }}</p>
+                </div>
+                <button
+                  type="button"
+                  class="icon-button icon-button--danger"
+                  (click)="auth.removePayment(payment.id)"
+                  [attr.aria-label]="'Remove ' + payment.label">
+                  <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else if (!showPaymentForm()) {
+          <p class="muted hint">No saved payment methods yet.</p>
+        }
+
+        @if (showPaymentForm()) {
+          <div class="form-stack sub-form">
+            <p class="callout">
+              <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+              Payments are simulated. We only keep a masked label, never your full card number.
+            </p>
+
+            <ion-select
+              class="field"
+              fill="outline"
+              label="Type"
+              labelPlacement="floating"
+              interface="popover"
+              [value]="newPaymentType()"
+              (ionChange)="newPaymentType.set($event.detail.value)">
+              <ion-select-option value="GCash">GCash</ion-select-option>
+              <ion-select-option value="Card">Credit/Debit Card</ion-select-option>
+            </ion-select>
+
+            <ion-input
+              class="field"
+              fill="outline"
+              label="Nickname"
+              labelPlacement="floating"
+              placeholder="My GCash"
+              [value]="newPaymentLabel()"
+              (ionInput)="newPaymentLabel.set($event.detail.value ?? '')">
+            </ion-input>
+
+            @if (newPaymentType() === 'Card') {
+              <ion-input
+                class="field"
+                fill="outline"
+                label="Last 4 digits"
+                labelPlacement="floating"
+                inputmode="numeric"
+                maxlength="4"
+                [value]="newPaymentLast4()"
+                (ionInput)="newPaymentLast4.set($event.detail.value ?? '')">
+              </ion-input>
+            }
+
+            <div class="btn-row">
+              <ion-button fill="outline" color="medium" (click)="showPaymentForm.set(false)">Cancel</ion-button>
+              <ion-button (click)="addPayment()">Save method</ion-button>
+            </div>
+          </div>
+        }
+      </section>
+
+      <ion-button expand="block" fill="outline" color="danger" (click)="logout()">
+        <ion-icon slot="start" name="log-out-outline" aria-hidden="true"></ion-icon>
+        Logout
+      </ion-button>
+    }
+  </div>
+</ion-content>

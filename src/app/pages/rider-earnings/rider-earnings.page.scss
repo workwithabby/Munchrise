@@ -1,0 +1,46 @@
+.total {
+  text-align: center;
+}
+
+.total p {
+  margin: 0;
+}
+
+.total__value {
+  font-family: var(--munch-font-heading);
+  font-size: 40px;
+  line-height: 1.2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.tile__label,
+.tile__sub {
+  font-size: var(--text-xs);
+  color: var(--color-muted-text);
+}
+
+.tile__value {
+  font-family: var(--munch-font-heading);
+  font-size: var(--text-xl);
+  color: var(--munch-brown);
+}
+
+.cash {
+  margin: 0;
+  font-family: var(--munch-font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-warning);
+}

@@ -1,0 +1,35 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Favorites</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+      <app-cart-button />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide">
+    @if (favorites.products().length === 0) {
+      <app-empty-state
+        icon="heart-outline"
+        title="No favorites yet"
+        text="Tap the heart on any product to save it here.">
+        <ion-button routerLink="/products">Browse the menu</ion-button>
+      </app-empty-state>
+    } @else {
+      <p class="result-count">
+        {{ favorites.count() }} saved {{ favorites.count() === 1 ? 'item' : 'items' }}
+      </p>
+
+      <div class="product-grid">
+        @for (product of favorites.products(); track product.id) {
+          <app-product-card [product]="product" />
+        }
+      </div>
+    }
+  </div>
+</ion-content>

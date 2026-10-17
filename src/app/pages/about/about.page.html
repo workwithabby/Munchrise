@@ -1,0 +1,99 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>About the App</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    <!-- Hero -->
+    <section class="hero">
+      <img class="hero__logo" src="assets/logo/munchrise-logo.png" alt="" />
+      <h1 class="hero__name">Munchrise</h1>
+      <p class="hero__tagline">"{{ tagline }}"</p>
+      <span class="hero__version">v{{ version }}</span>
+    </section>
+
+    <!-- At a glance -->
+    <section class="stats" aria-label="Munchrise at a glance">
+      @for (stat of stats; track stat.label) {
+        <div class="stat">
+          <strong class="stat__value">{{ stat.value }}</strong>
+          <span class="stat__label">{{ stat.label }}</span>
+        </div>
+      }
+    </section>
+
+    <!-- What is it -->
+    <section class="card prose">
+      <h2 class="section-title">What is Munchrise?</h2>
+      <p>
+        Munchrise is a breakfast food ordering app. Pick from our menu of sandwiches, rice meals,
+        breads and smoothie bowls, add them to your cart, check out and follow your order —
+        all from your phone.
+      </p>
+      <p>
+        It is a school project for IT 005 – Integrative Programming and Technologies, built by
+        students who love a good morning meal.
+      </p>
+    </section>
+
+    <!-- How it works -->
+    <section>
+      <h2 class="section-title block-title">How it works</h2>
+      <ol class="steps">
+        @for (step of steps; track step.title; let i = $index) {
+          <li class="step">
+            <span class="step__num" aria-hidden="true">{{ i + 1 }}</span>
+            <span class="step__text">
+              <strong>{{ step.title }}</strong>
+              <span>{{ step.text }}</span>
+            </span>
+          </li>
+        }
+      </ol>
+    </section>
+
+    <!-- Features -->
+    <section>
+      <h2 class="section-title block-title">What can it do?</h2>
+      <ul class="feature-list">
+        @for (feature of features; track feature.text) {
+          <li class="feature">
+            <span class="feature__icon" aria-hidden="true"><ion-icon [name]="feature.icon"></ion-icon></span>
+            <span class="feature__text">{{ feature.text }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <!-- Good to know -->
+    <section class="card know">
+      <h2 class="section-title">Good to know</h2>
+      <ul class="note-list">
+        @for (note of notes; track note.text) {
+          <li>
+            <ion-icon [name]="note.icon" aria-hidden="true"></ion-icon>
+            <span>{{ note.text }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <div class="btn-row">
+      <ion-button fill="outline" routerLink="/developers" routerDirection="forward">
+        <ion-icon slot="start" name="people-outline" aria-hidden="true"></ion-icon>
+        Meet the team
+      </ion-button>
+      <ion-button routerLink="/products" routerDirection="forward">Browse menu</ion-button>
+    </div>
+
+    <p class="muted credits">Rise, Munch, Repeat! · Made by the IT31S6 team</p>
+  </div>
+</ion-content>

@@ -68,3 +68,11 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Supabase secrets (never commit)
+.env
+.env.*
+supabase/.temp
+
+# Local Supabase connection (copy supabase.config.example.ts to create it)
+src/app/config/supabase.config.ts

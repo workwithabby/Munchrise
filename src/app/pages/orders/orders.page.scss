@@ -1,0 +1,64 @@
+/* Orders — cards, pills and buttons come from global.scss */
+.order-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.order-number {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.order-thumbs {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.order-thumbs .thumb {
+  width: 56px;
+}
+
+.order-summary {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+.order-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Let the action buttons wrap below the total instead of overflowing the card */
+.order-foot {
+  flex-wrap: wrap;
+}
+
+.order-foot .btn-row {
+  flex: 1 1 200px;
+  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.order-foot .btn-row > ion-button {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.order-total {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--munch-brown);
+}

@@ -1,0 +1,134 @@
+<ion-content [fullscreen]="true" [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <main class="welcome">
+    <!-- Hero -->
+    <section class="hero" (pointermove)="onPointer($event)" (pointerleave)="resetPointer()">
+      <!-- Rising sun + drifting crumbs: purely decorative -->
+      <div class="hero__sun" aria-hidden="true"></div>
+      <span class="hero__orb hero__orb--a" aria-hidden="true"></span>
+      <span class="hero__orb hero__orb--b" aria-hidden="true"></span>
+      <span class="hero__orb hero__orb--c" aria-hidden="true"></span>
+      <div class="hero__rays" aria-hidden="true"></div>
+
+      <div class="hero__brand">
+        @if (!logoFailed()) {
+          <img class="hero__logo" src="assets/logo/munchrise-logo.png" alt="Munchrise" (error)="logoFailed.set(true)" />
+        } @else {
+          <span class="hero__wordmark">Munch<span>rise</span></span>
+        }
+      </div>
+
+      <h1 class="hero__title" aria-label="Breakfast, delivered at sunrise.">
+        @for (word of titleWords; track $index) {
+          <span class="word" [class.word--accent]="$last" aria-hidden="true" [style.--i]="$index">{{ word }}</span>{{ ' ' }}
+        }
+      </h1>
+      <p class="hero__sub">Fresh sandwiches, pancakes, rice bowls and burritos: ordered in a few taps.</p>
+
+      <div class="hero__actions">
+        @if (signedIn()) {
+          <ion-button expand="block" class="hero__cta" (click)="continueSession()">
+            Continue as {{ firstName() }}
+            <ion-icon slot="end" name="arrow-forward" aria-hidden="true"></ion-icon>
+          </ion-button>
+          <button type="button" class="hero__guest" (click)="logout()">
+            Not {{ firstName() }}? <span>Log out</span>
+          </button>
+        } @else {
+          <ion-button expand="block" class="hero__cta" routerLink="/signup">
+            Create an account
+            <ion-icon slot="end" name="arrow-forward" aria-hidden="true"></ion-icon>
+          </ion-button>
+          <ion-button expand="block" fill="outline" class="hero__login" routerLink="/login">Log in</ion-button>
+          <button type="button" class="hero__guest" (click)="continueAsGuest()">
+            Just looking? <span>Continue as guest</span>
+          </button>
+        }
+      </div>
+
+      <ul class="hero__stats" aria-label="Munchrise at a glance">
+        @for (stat of stats; track stat.label) {
+          <li>
+            <strong>{{ stat.value }}</strong>
+            <span>{{ stat.label }}</span>
+          </li>
+        }
+      </ul>
+
+      <span class="hero__scroll" aria-hidden="true">
+        <ion-icon name="chevron-down"></ion-icon>
+      </span>
+    </section>
+
+    <!-- Scrolling menu ticker -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track">
+        @for (n of [0, 1]; track n) {
+          <span class="ticker__group">
+            @for (w of tickerWords; track w) {
+              <span>{{ w }}</span><i>✦</i>
+            }
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Why Munchrise -->
+    <section class="block reveal" aria-labelledby="perks-title">
+      <h2 id="perks-title" class="block__title">Why you'll love it</h2>
+      <ul class="perks">
+        @for (perk of perks; track perk.title) {
+          <li class="perk perk--{{ $index % 3 }} reveal" [style.--d]="$index * 120 + 'ms'">
+            <span class="icon-circle" aria-hidden="true"><ion-icon [name]="perk.icon"></ion-icon></span>
+            <div>
+              <p class="perk__title">{{ perk.title }}</p>
+              <p class="perk__text">{{ perk.text }}</p>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <!-- How it works: tap a step -->
+    <section class="block reveal" aria-labelledby="how-title">
+      <h2 id="how-title" class="block__title">How it works</h2>
+      <ol class="steps">
+        @for (step of steps; track step.title; let i = $index) {
+          <li>
+            <button type="button" class="step" [class.step--active]="activeStep() === i" [attr.aria-expanded]="activeStep() === i" (click)="activeStep.set(i)">
+              <span class="step__num">{{ i + 1 }}</span>
+              <span class="step__body">
+                <span class="step__title">{{ step.title }}</span>
+                <span class="step__text">{{ step.text }}</span>
+              </span>
+              <ion-icon [name]="step.icon" aria-hidden="true"></ion-icon>
+            </button>
+          </li>
+        }
+      </ol>
+    </section>
+
+    <!-- Popular -->
+    @if (popular.length > 0) {
+      <section class="block block--bleed reveal" aria-labelledby="popular-title">
+        <h2 id="popular-title" class="block__title">Popular this morning</h2>
+        <ul class="popular">
+          @for (product of popular; track product.id) {
+            <li class="popular__item" [style.--k]="$index" (pointermove)="tilt($event)" (pointerleave)="untilt($event)">
+              <app-product-image [src]="product.image" [name]="product.name" [category]="product.category" />
+              <p class="popular__name">{{ product.name }}</p>
+              <p class="popular__price num">{{ product.price | peso }}</p>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <!-- Closing call to action -->
+    <section class="closing reveal">
+      <span class="closing__glow" aria-hidden="true"></span>
+      <h2>Ready to rise and munch?</h2>
+      <ion-button expand="block" class="pulse" routerLink="/signup">Get started</ion-button>
+      <p class="closing__note">Free to join. Order your breakfast in a few taps.</p>
+    </section>
+  </main>
+</ion-content>

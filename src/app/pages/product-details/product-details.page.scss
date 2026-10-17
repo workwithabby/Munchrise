@@ -1,0 +1,370 @@
+/* Product details — shared blocks come from global.scss */
+.hero {
+  position: relative;
+}
+
+.best-seller {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.head h1 {
+  margin: 2px 0 0;
+  font-size: var(--text-2xl);
+}
+
+.category {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-teal-ink);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+.rating strong {
+  color: var(--munch-brown);
+}
+
+.rating ion-icon {
+  color: var(--munch-mustard);
+}
+
+.price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.price {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--munch-orange);
+}
+
+.description {
+  margin: var(--space-3) 0 0;
+  line-height: 1.6;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.tags .pill {
+  text-transform: capitalize;
+}
+
+/* --- Nutrition --- */
+.nutrition {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.nutrition-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-1);
+  text-align: center;
+}
+
+.nutrition-item strong {
+  font-size: var(--text-md);
+  font-weight: 800;
+}
+
+.nutrition-item span {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted-text);
+}
+
+/* --- Reviews --- */
+.review {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.review:first-child {
+  padding-top: 0;
+}
+
+.review:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.stars {
+  display: flex;
+  gap: 1px;
+  color: var(--munch-mustard);
+  font-size: 14px;
+}
+
+.review-comment {
+  margin: var(--space-1) 0 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.review-date {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+.review-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.review-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--color-teal-ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-action--danger {
+  color: var(--color-danger, #b3261e);
+}
+
+.review-form {
+  margin-top: var(--space-3);
+}
+
+.form-title {
+  margin: 0;
+}
+
+.star-picker {
+  display: flex;
+  gap: 2px;
+  margin: calc(var(--space-2) * -1) 0 0 -10px;
+}
+
+.star-picker button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--munch-mustard);
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* Empty state sits inside a card here, so it needs less air */
+app-empty-state.compact ::ng-deep .empty-state {
+  padding: var(--space-4) 0;
+}
+
+/* Not delivered yet: friendly why-you-cannot-review card */
+.review-locked {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.review-locked .form-title {
+  margin: 0 0 var(--space-1);
+}
+
+.review-locked p {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+/* ===== Redesign: full-bleed picture, overlapping info sheet, colored nutrition ===== */
+.page > .hero {
+  margin: calc(var(--space-4) * -1) calc(var(--gutter) * -1) 0;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  animation: none;
+}
+
+.hero app-product-image {
+  --img-radius: 0;
+  display: block;
+}
+
+/* the picture eases in from slightly zoomed */
+.hero app-product-image ::ng-deep img,
+.hero app-product-image ::ng-deep .cover {
+  animation: pd-zoom 0.9s var(--ease) both;
+}
+
+.best-seller {
+  top: var(--space-4);
+  left: var(--gutter);
+}
+
+.fav {
+  position: absolute;
+  right: var(--gutter);
+  bottom: calc(var(--space-6) + 4px);
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(6px);
+}
+
+.fav.is-on {
+  animation: pd-heart 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.page > .sheet {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(var(--space-6) * -1);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  animation: pd-sheet 0.6s 0.15s var(--ease) backwards;
+}
+
+.sheet h1 {
+  margin: 2px 0 0;
+  font-size: var(--text-2xl);
+  line-height: 1.1;
+}
+
+.sheet .price-row {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border-strong);
+}
+
+.sheet .price {
+  animation: m-pop 0.5s 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.sheet .description {
+  margin-top: var(--space-3);
+}
+
+.nutrition-item {
+  position: relative;
+  gap: 4px;
+  padding: var(--space-3) var(--space-1) var(--space-3);
+  overflow: hidden;
+}
+
+.nutrition-item ion-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.nutrition-item::after {
+  /* colored accent line along the bottom */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.8;
+  transform-origin: left;
+  animation: pd-bar 0.8s 0.4s var(--ease) backwards;
+}
+
+.n-cal { color: var(--munch-orange); }
+.n-pro { color: var(--color-teal-ink); }
+.n-carb { color: #b9851f; }
+.n-fat { color: #7a5c43; }
+
+.nutrition-item strong {
+  color: var(--munch-brown);
+}
+
+.related-row {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 2px var(--gutter) var(--space-2);
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  cursor: grab;
+}
+
+.related-row::-webkit-scrollbar {
+  display: none;
+}
+
+.related-row app-product-card {
+  scroll-snap-align: start;
+}
+
+.related-row.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+.related-row.is-dragging * {
+  pointer-events: none;
+}
+
+/* Buy bar: frosted glass like the other bars */
+.action-footer {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+@keyframes pd-zoom { from { transform: scale(1.12); } to { transform: scale(1); } }
+@keyframes pd-sheet { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes pd-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes pd-heart { 0% { transform: scale(0.7); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }

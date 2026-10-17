@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Inventory</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack">
+    <div class="kpi-grid kpi-grid--3">
+      <div class="kpi kpi--danger">
+        <span class="kpi__label">Out of stock</span>
+        <span class="kpi__value num">{{ outCount() }}</span>
+      </div>
+      <div class="kpi kpi--warning">
+        <span class="kpi__label">Low (5 or less)</span>
+        <span class="kpi__value num">{{ lowCount() }}</span>
+      </div>
+    </div>
+
+    <div class="chip-row chip-row--wrap" role="group" aria-label="Show">
+      <button type="button" class="filter-chip" [class.is-active]="view() === 'attention'"
+        [attr.aria-pressed]="view() === 'attention'" (click)="view.set('attention')">Needs restock</button>
+      <button type="button" class="filter-chip" [class.is-active]="view() === 'all'"
+        [attr.aria-pressed]="view() === 'all'" (click)="view.set('all')">All products</button>
+    </div>
+
+    @if (items().length === 0) {
+      <app-empty-state icon="cube-outline" title="All stocked up" text="No product is running low right now." />
+    } @else {
+      <div class="stack stack--sm">
+        @for (product of items(); track product.id) {
+          <article class="card inv-card">
+            <div class="inv-card__top">
+              <app-product-image class="thumb thumb--sm" [src]="product.image" [name]="product.name" [category]="product.category" />
+              <div class="inv-card__info">
+                <p class="inv-card__name">{{ product.name }}</p>
+                <p class="row-item__meta">{{ product.category }}</p>
+              </div>
+              @if (product.stock === 0) {
+                <span class="pill pill--danger">Out</span>
+              } @else if (product.stock <= 5) {
+                <span class="pill pill--warning">{{ product.stock }} left</span>
+              } @else {
+                <span class="pill pill--success">{{ product.stock }}</span>
+              }
+            </div>
+            <div class="chip-row chip-row--wrap inv-card__actions" role="group" [attr.aria-label]="'Restock ' + product.name">
+              @for (amount of restockAmounts; track amount) {
+                <button type="button" class="filter-chip" (click)="restock(product, amount)">+{{ amount }}</button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</ion-content>
+
+<ion-footer>
+  <app-role-tab-bar role="admin" />
+</ion-footer>

@@ -1,0 +1,86 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Help &amp; Support</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    <!-- Hero with a search over the questions -->
+    <section class="hero">
+      <span class="hero__icon" aria-hidden="true"><ion-icon name="help-circle-outline"></ion-icon></span>
+      <h1>How can we help?</h1>
+      <p>Quick answers to the most common breakfast questions.</p>
+      <label class="hero__search">
+        <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+        <input
+          type="search"
+          placeholder="Search questions"
+          aria-label="Search questions"
+          [value]="query()"
+          (input)="onSearch($event)" />
+      </label>
+    </section>
+
+    <!-- Contact shortcuts: tap to open the mail or phone app -->
+    <section>
+      <h2 class="section-title block-title">Talk to us</h2>
+      <ion-list class="contact-grid" lines="none">
+        <ion-item class="contact" href="mailto:munchrise@hotmail.com" detail="false">
+          <span class="contact__icon" aria-hidden="true">
+            <ion-icon name="mail-outline"></ion-icon>
+          </span>
+          <ion-label>
+            <p class="contact__title">Email</p>
+            <p class="contact__meta">munchrise@hotmail.com</p>
+          </ion-label>
+        </ion-item>
+        <ion-item class="contact contact--teal" href="tel:+639910369667" detail="false">
+          <span class="contact__icon" aria-hidden="true">
+            <ion-icon name="call-outline"></ion-icon>
+          </span>
+          <ion-label>
+            <p class="contact__title">Call us</p>
+            <p class="contact__meta">0991 036 9667</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </section>
+
+    <!-- FAQ: tap a question to open its answer -->
+    <section>
+      <h2 class="section-title block-title">Frequently asked</h2>
+      <ul class="faq-list">
+        @for (faq of visibleFaqs(); track faq.q) {
+          <li class="faq-item" [class.is-open]="isOpen(faq)">
+            <button
+              type="button"
+              class="faq-q"
+              [attr.aria-expanded]="isOpen(faq)"
+              (click)="toggle(indexOf(faq))">
+              <span class="faq-q__icon" aria-hidden="true"><ion-icon [name]="faq.icon"></ion-icon></span>
+              <span class="faq-q__text">{{ faq.q }}</span>
+              <ion-icon name="chevron-down" class="faq-q__chevron" aria-hidden="true"></ion-icon>
+            </button>
+            @if (isOpen(faq)) {
+              <p class="faq-a">{{ faq.a }}</p>
+            }
+          </li>
+        } @empty {
+          <li class="faq-empty">
+            <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+            <p>No answers match "{{ query() }}". Try another word, or contact us above.</p>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <p class="muted credits">Still stuck? Reach out through any of the options above.</p>
+  </div>
+</ion-content>

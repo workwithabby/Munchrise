@@ -1,0 +1,27 @@
+<ion-tabs>
+  <!-- Tab buttons have no routerLink on purpose: <ion-tabs> already navigates on
+       tap, and a second navigation made guests see the login toast twice. -->
+  <!-- ion-tabs renders its own <ion-router-outlet> internally; adding a second
+       one here would sit as an empty full-screen layer over the header and
+       swallow every tap in the toolbar. -->
+  <!-- Admins have their own side menu; the shopping tabs are hidden for them. -->
+  <ion-tab-bar slot="bottom" [hidden]="auth.isAdmin()">
+    @for (tab of tabs; track tab.id) {
+      <ion-tab-button
+        [tab]="tab.id"
+        [class.is-selected]="activeTab() === tab.id"
+        [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
+        (click)="activeTab.set(tab.id)">
+        <span class="tab-icon">
+          <ion-icon
+            [name]="activeTab() === tab.id ? tab.iconActive : tab.icon"
+            aria-hidden="true"></ion-icon>
+          @if (tab.badge === 'cart' && cartCount() > 0) {
+            <span class="tab-badge" aria-hidden="true">{{ cartCount() }}</span>
+          }
+        </span>
+        <ion-label>{{ tab.label }}</ion-label>
+      </ion-tab-button>
+    }
+  </ion-tab-bar>
+</ion-tabs>

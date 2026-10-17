@@ -1,0 +1,295 @@
+/* Admin: product management. Shared blocks (card, pill, chips) come from global.scss. */
+
+.admin-page {
+  /* room for the floating add button */
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+
+/* --- Inventory stats (also filters) --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 72px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.stat__value {
+  font-family: var(--munch-font-heading);
+  font-size: var(--text-2xl);
+  line-height: 1.1;
+  color: var(--munch-brown);
+}
+
+.stat--warning .stat__value {
+  color: var(--color-warning);
+}
+
+.stat--danger .stat__value {
+  color: var(--color-danger);
+}
+
+.stat__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted-text);
+}
+
+.stat.is-active {
+  border-color: var(--munch-orange);
+  background: var(--color-orange-tint);
+  box-shadow: var(--shadow-md);
+}
+
+.stat:focus-visible {
+  outline: 2px solid var(--munch-orange);
+  outline-offset: 2px;
+}
+
+/* --- Product list: one card, tappable rows --- */
+.admin-list {
+  padding: var(--space-1) 0;
+  overflow: hidden;
+}
+
+.admin-row {
+  --background: transparent;
+  --padding-start: var(--space-3);
+  --inner-padding-end: var(--space-1);
+  --min-height: 76px;
+  --inner-border-width: 0 0 1px 0;
+  --border-color: var(--color-border);
+}
+
+.admin-row:last-of-type {
+  --inner-border-width: 0;
+}
+
+.admin-row .thumb {
+  margin-inline-end: var(--space-3);
+}
+
+.admin-row ion-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-2) 0;
+}
+
+.row-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* +/- stock buttons: 44px tap targets */
+.stepper {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.stepper__btn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--munch-brown);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.stepper__btn:active:not(:disabled) {
+  background: var(--surface-muted);
+  transform: scale(0.95);
+}
+
+.stepper__btn:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.product-name {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--munch-brown) !important;
+  white-space: normal;
+}
+
+/* 48px tap target for delete */
+.row-delete {
+  min-width: 48px;
+  min-height: 48px;
+  margin: 0;
+}
+
+/* --- Floating add button --- */
+ion-fab-button {
+  --background: var(--munch-orange);
+  --background-activated: var(--grad-hero-end);
+  --color: var(--munch-white);
+  --box-shadow: var(--shadow-lg);
+}
+
+/* --- Add / edit modal --- */
+.form-title {
+  font-family: var(--munch-font-heading);
+}
+
+.product-form {
+  padding-bottom: var(--space-6);
+}
+
+.product-form ion-toggle {
+  margin: var(--space-1) 0;
+}
+
+.form-actions {
+  --background: var(--munch-white);
+  --border-width: 0;
+  padding: var(--space-2) var(--gutter) calc(var(--space-2) + env(safe-area-inset-bottom));
+}
+
+/* ===== Redesign: one card per product, bigger pictures, stock bar, motion ===== */
+.admin-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  padding: 0;
+  background: transparent;
+}
+
+@media (min-width: 760px) {
+  .admin-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.admin-row {
+  --padding-start: var(--space-3);
+  --inner-padding-end: var(--space-2);
+  --min-height: 96px;
+  --inner-border-width: 0;
+  --border-radius: var(--radius-lg);
+  --background: var(--surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  animation: m-rise 0.5s var(--ease) backwards;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-base) var(--ease), border-color var(--dur-base) var(--ease);
+}
+
+.admin-row:nth-of-type(1) { animation-delay: 0.03s; }
+.admin-row:nth-of-type(2) { animation-delay: 0.08s; }
+.admin-row:nth-of-type(3) { animation-delay: 0.13s; }
+.admin-row:nth-of-type(4) { animation-delay: 0.18s; }
+.admin-row:nth-of-type(5) { animation-delay: 0.23s; }
+.admin-row:nth-of-type(6) { animation-delay: 0.28s; }
+.admin-row:nth-of-type(n + 7) { animation-delay: 0.32s; }
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-row:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--munch-mustard);
+  }
+}
+
+.admin-row .thumb--lg {
+  flex: none;
+  width: 76px;
+  --img-radius: var(--radius-md);
+  margin-inline-end: var(--space-3);
+}
+
+.admin-row .price {
+  color: var(--munch-orange);
+}
+
+.stock-bar {
+  display: block;
+  width: 100%;
+  height: 5px;
+  margin: 2px 0 2px;
+  border-radius: 999px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.stock-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-success);
+  transform-origin: left;
+  animation: ad-fill 0.8s 0.2s var(--ease) backwards;
+}
+
+.stock-bar[data-level='low'] > span {
+  background: var(--color-warning);
+}
+
+.stock-bar[data-level='out'] > span {
+  background: var(--color-danger);
+}
+
+.row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.row-edit {
+  font-size: 18px;
+  color: var(--color-muted-text);
+}
+
+/* The floating add button gently pulses so new admins find it */
+ion-fab-button {
+  animation: m-pop 0.5s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+@keyframes ad-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.photo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.photo-preview {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}

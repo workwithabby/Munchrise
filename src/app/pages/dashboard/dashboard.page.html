@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <app-notification-bell />
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page stack">
+    <!-- Welcome -->
+    <section class="card card--hero welcome">
+      <p class="muted greeting">Kumusta,</p>
+      <h1>{{ auth.displayName() }}</h1>
+      <p class="muted">
+        @if (auth.isGuest()) {
+          You're browsing as a guest — create an account to keep your points.
+        } @else {
+          Here's your breakfast dashboard.
+        }
+      </p>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value num">{{ rewards.points() }}</span>
+          <span class="stat-label">Points</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value num">{{ orders.orderCount() }}</span>
+          <span class="stat-label">Orders</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value num">{{ cart.count() }}</span>
+          <span class="stat-label">In cart</span>
+        </div>
+      </div>
+
+      <ion-button expand="block" class="hero-cta" routerLink="/products">
+        <ion-icon slot="start" name="fast-food-outline" aria-hidden="true"></ion-icon>
+        Order breakfast
+      </ion-button>
+    </section>
+
+    <!-- Shortcuts -->
+    <section class="shortcuts" aria-label="Shortcuts">
+      <a class="card shortcut" routerLink="/rewards">
+        <span class="icon-circle" aria-hidden="true"><ion-icon name="star-outline"></ion-icon></span>
+        <span>Rewards</span>
+      </a>
+      <a class="card shortcut" routerLink="/favorites">
+        <span class="icon-circle" aria-hidden="true"><ion-icon name="heart-outline"></ion-icon></span>
+        <span>Favorites</span>
+      </a>
+      <a class="card shortcut" routerLink="/orders">
+        <span class="icon-circle" aria-hidden="true"><ion-icon name="receipt-outline"></ion-icon></span>
+        <span>Orders</span>
+      </a>
+      <a class="card shortcut" routerLink="/profile">
+        <span class="icon-circle" aria-hidden="true"><ion-icon name="person-outline"></ion-icon></span>
+        <span>Profile</span>
+      </a>
+    </section>
+
+    <!-- Last order -->
+    <section class="card">
+      <div class="section-head">
+        <h2 class="section-title">Your latest order</h2>
+        @if (lastOrder()) {
+          <a class="section-link" routerLink="/orders">See all</a>
+        }
+      </div>
+
+      @if (lastOrder(); as order) {
+        <div class="row-item last-order">
+          <span class="icon-circle" aria-hidden="true"><ion-icon name="receipt-outline"></ion-icon></span>
+          <div class="row-item__main">
+            <p class="row-item__title">{{ order.id }}</p>
+            <p class="row-item__meta">
+              {{ itemCount() }} {{ itemCount() === 1 ? 'item' : 'items' }} · {{ order.total | peso }}
+            </p>
+          </div>
+          <span class="pill status-pill" [attr.data-status]="order.status">{{ order.status }}</span>
+        </div>
+        <ion-button expand="block" fill="outline" [routerLink]="['/order-confirmation', order.id]">
+          View receipt
+        </ion-button>
+      } @else {
+        <p class="muted note">No orders yet — your receipt will appear here after your first order.</p>
+        <ion-button expand="block" fill="outline" routerLink="/products">Browse the menu</ion-button>
+      }
+    </section>
+  </div>
+</ion-content>

@@ -1,0 +1,42 @@
+<ion-card class="product-card" [class.is-tile]="variant() === 'tile'">
+  <!-- Tap the picture or the name to open the product details -->
+  <div class="image-wrap" [routerLink]="['/product', product().id]">
+    <app-product-image [src]="product().image" [name]="product().name" [category]="product().category" />
+
+    @if (product().isBestSeller) {
+      <span class="pill pill--brand best-seller">Best seller</span>
+    }
+
+    <button
+      type="button"
+      class="icon-button heart"
+      [class.is-on]="isFavorite()"
+      (click)="toggleFavorite(); $event.stopPropagation()"
+      [attr.aria-pressed]="isFavorite()"
+      [attr.aria-label]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'">
+      <ion-icon [name]="isFavorite() ? 'heart' : 'heart-outline'" aria-hidden="true"></ion-icon>
+    </button>
+  </div>
+
+  <div class="body" [routerLink]="['/product', product().id]">
+    <p class="name">{{ product().name }}</p>
+    <p class="meta">
+      @if (product().rating > 0) {
+        <ion-icon name="star" aria-hidden="true"></ion-icon>
+        <span>{{ product().rating.toFixed(1) }}</span>
+        <span class="dot" aria-hidden="true">·</span>
+      }
+      <span>{{ product().category }}</span>
+    </p>
+  </div>
+
+  <div class="footer">
+    <span class="price num">{{ product().price | peso }}</span>
+    <ion-button
+      class="add"
+      (click)="addToCart()"
+      [attr.aria-label]="'Add ' + product().name + ' to cart'">
+      <ion-icon slot="icon-only" name="add"></ion-icon>
+    </ion-button>
+  </div>
+</ion-card>

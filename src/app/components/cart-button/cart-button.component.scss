@@ -1,0 +1,29 @@
+.cart-button {
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  --color: var(--munch-brown);
+}
+
+/* Small count dot on the cart icon's top-right corner */
+.cart-badge {
+  /* anchored to the icon's top-right corner, so it fits at any width */
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 2px;
+  --padding-end: 2px;
+  position: absolute;
+  top: 1px;
+  right: -3px;
+  left: auto;
+  min-width: 11px;
+  height: 11px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 9px;
+  border: 1px solid var(--munch-white);
+  box-shadow: none;
+  pointer-events: none;
+}

@@ -1,0 +1,40 @@
+<div class="splash" role="status" aria-label="Munchrise is loading">
+  <!-- Sunrise backdrop: purely decorative -->
+  <div class="splash-sky" aria-hidden="true">
+    <div class="splash-rays"></div>
+    <div class="splash-sun"></div>
+    <span class="splash-spark splash-spark--1"></span>
+    <span class="splash-spark splash-spark--2"></span>
+    <span class="splash-spark splash-spark--3"></span>
+  </div>
+
+  <div class="splash-center">
+    @if (!logoFailed()) {
+      <img
+        class="splash-logo"
+        src="assets/logo/munchrise-logo.png"
+        alt="Munchrise logo"
+        (error)="logoFailed.set(true)" />
+    } @else {
+      <div class="splash-fallback">
+        <span class="splash-mark" aria-hidden="true">
+          <ion-icon name="cafe-outline"></ion-icon>
+        </span>
+        <span class="splash-brand">Munch<span class="splash-rise">rise</span></span>
+      </div>
+    }
+
+    <p class="splash-tagline">
+      @for (word of tagline; track $index) {<span class="splash-word" [style.--i]="$index">{{ word }}</span>{{ ' ' }}}
+    </p>
+  </div>
+
+  <div class="splash-loader" aria-hidden="true">
+    <div class="splash-bar"><span></span></div>
+    <div class="splash-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</div>

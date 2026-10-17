@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Staff &amp; roles</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack">
+    @if (!available) {
+      <app-empty-state
+        icon="people-outline"
+        title="Needs the online backend"
+        text="Roles are saved on the server, so this screen only works when the app is connected." />
+    } @else {
+      <p class="muted">
+        New sign-ups start as customers. Pick a role below — the person sees their new screens the next time they log in.
+      </p>
+
+      <input
+        class="search"
+        type="search"
+        placeholder="Search name or email"
+        aria-label="Search accounts"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)" />
+
+      <div class="chip-row chip-row--wrap" role="group" aria-label="Show">
+        <button type="button" class="filter-chip" [class.is-active]="filter() === 'all'"
+          [attr.aria-pressed]="filter() === 'all'" (click)="filter.set('all')">
+          All <span class="chip-count">{{ count('all') }}</span>
+        </button>
+        @for (role of roles; track role.value) {
+          <button type="button" class="filter-chip" [class.is-active]="filter() === role.value"
+            [attr.aria-pressed]="filter() === role.value" (click)="filter.set(role.value)">
+            {{ role.label }} <span class="chip-count">{{ count(role.value) }}</span>
+          </button>
+        }
+      </div>
+
+      @if (accounts().length === 0) {
+        <app-empty-state
+          icon="people-outline"
+          [title]="loading() ? 'Loading accounts…' : 'No accounts here'"
+          text="Try another filter or search." />
+      } @else {
+        <div class="stack stack--sm">
+          @for (account of accounts(); track account.id) {
+            <article class="card account">
+              <div class="account__info">
+                <p class="account__name">{{ account.name }}@if (isMe(account)) { <span class="pill pill--teal">You</span> }</p>
+                <p class="row-item__meta">{{ account.email }}</p>
+              </div>
+              <div class="chip-row chip-row--wrap" role="group" [attr.aria-label]="'Role for ' + account.name">
+                @for (role of roles; track role.value) {
+                  <button type="button" class="filter-chip filter-chip--sm"
+                    [class.is-active]="account.role === role.value"
+                    [attr.aria-pressed]="account.role === role.value"
+                    [disabled]="isMe(account) || savingId() === account.id"
+                    (click)="choose(account, role.value)">
+                    {{ role.label }}
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+  </div>
+</ion-content>

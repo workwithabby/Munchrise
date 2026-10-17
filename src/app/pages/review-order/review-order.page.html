@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/orders"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Rate your order</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--narrow stack">
+    @if (order(); as o) {
+      @if (!canReview()) {
+        <app-empty-state icon="time-outline" title="Not delivered yet" text="You can rate your order once it has been delivered.">
+          <ion-button [routerLink]="['/track', o.id]">Track my order</ion-button>
+        </app-empty-state>
+      } @else {
+        <p class="muted">Order {{ o.id }} — tap the stars. You can skip anything you do not want to rate.</p>
+
+        <!-- Products -->
+        @for (item of lines(); track item.line.productId) {
+          <section class="card review-card">
+            <div class="row-item">
+              <app-product-image class="thumb thumb--sm" [src]="imageFor(item.line)" [name]="item.line.name" [category]="categoryFor(item.line)" />
+              <div class="row-item__main">
+                <p class="row-item__title">{{ item.line.name }}</p>
+                @if (item.done) {
+                  <p class="row-item__meta text-success">You already reviewed this</p>
+                }
+              </div>
+            </div>
+
+            @if (!item.done) {
+              <div class="star-picker" role="radiogroup" [attr.aria-label]="'Rating for ' + item.line.name">
+                @for (star of stars; track star) {
+                  <button type="button" role="radio" class="star-btn"
+                    [attr.aria-checked]="(ratings()[item.line.productId] ?? 0) === star"
+                    [attr.aria-label]="star + (star === 1 ? ' star' : ' stars')"
+                    (click)="rate(item.line.productId, star)">
+                    <ion-icon [name]="star <= (ratings()[item.line.productId] ?? 0) ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>
+                  </button>
+                }
+              </div>
+              <ion-textarea class="field" fill="outline" label="Comment (optional)" labelPlacement="floating"
+                [autoGrow]="true" [rows]="2" maxlength="500"
+                [value]="comments()[item.line.productId] ?? ''"
+                (ionInput)="comment(item.line.productId, $event.detail.value ?? '')">
+              </ion-textarea>
+            }
+          </section>
+        }
+
+        <!-- Rider -->
+        @if (hasRider()) {
+          <section class="card review-card">
+            <div class="row-item">
+              <span class="icon-circle" aria-hidden="true"><ion-icon name="bicycle-outline"></ion-icon></span>
+              <div class="row-item__main">
+                <p class="row-item__meta">Your rider</p>
+                <p class="row-item__title">{{ o.riderName }}</p>
+              </div>
+            </div>
+
+            @if (riderDone(); as done) {
+              <p class="row-item__meta text-success">
+                You rated your rider {{ done.rating }} / 5
+              </p>
+            } @else {
+              <div class="star-picker" role="radiogroup" aria-label="Rating for your rider">
+                @for (star of stars; track star) {
+                  <button type="button" role="radio" class="star-btn"
+                    [attr.aria-checked]="riderRating() === star"
+                    [attr.aria-label]="star + (star === 1 ? ' star' : ' stars')"
+                    (click)="riderRating.set(star)">
+                    <ion-icon [name]="star <= riderRating() ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>
+                  </button>
+                }
+              </div>
+              <ion-textarea class="field" fill="outline" label="How was the delivery? (optional)" labelPlacement="floating"
+                [autoGrow]="true" [rows]="2" maxlength="500"
+                [value]="riderComment()" (ionInput)="riderComment.set($event.detail.value ?? '')">
+              </ion-textarea>
+            }
+          </section>
+        }
+
+        <ion-button expand="block" [disabled]="!canSubmit() || saving()" (click)="submit()">
+          {{ saving() ? 'Sending…' : 'Submit reviews' }}
+        </ion-button>
+      }
+    } @else {
+      <app-empty-state icon="receipt-outline" title="Order not found" text="We could not find that order number.">
+        <ion-button routerLink="/orders">Go to my orders</ion-button>
+      </app-empty-state>
+    }
+  </div>
+</ion-content>

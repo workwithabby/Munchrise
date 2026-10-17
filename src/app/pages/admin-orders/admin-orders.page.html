@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Orders</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack">
+    <div class="chip-row" role="group" aria-label="Filter by status">
+      @for (item of filters; track item) {
+        <button type="button" class="filter-chip" [class.is-active]="filter() === item"
+          [attr.aria-pressed]="filter() === item" (click)="filter.set(item)">
+          {{ item }}
+          <span class="chip-count">{{ countFor(item) }}</span>
+        </button>
+      }
+    </div>
+
+    @if (orders().length === 0) {
+      <app-empty-state icon="receipt-outline" title="No orders here"
+        [text]="filter() === 'All' ? 'Orders appear after customers check out.' : 'No order is ' + filter() + ' right now.'" />
+    } @else {
+      @for (order of orders(); track order.id) {
+        <article class="card order-card">
+          <div class="order-head">
+            <div>
+              <p class="order-id">{{ order.id }}</p>
+              <p class="row-item__meta">{{ order.placedAt | date: 'MMM d, h:mm a' }}</p>
+            </div>
+            <span class="pill" [class]="statusClass(order.status)">{{ order.status }}</span>
+          </div>
+
+          <ul class="order-lines">
+            @for (line of order.items; track line.productId) {
+              <li><span>{{ line.quantity }}× {{ line.name }}</span><span class="num">{{ line.price * line.quantity | peso }}</span></li>
+            }
+          </ul>
+
+          <p class="row-item__meta">{{ order.shipping.fullName }} · {{ order.shipping.city }} · {{ order.payment }} · {{ order.payment === 'Cash on Delivery' ? 'Cash due' : 'PAID' + (order.paymentRef ? ' · ' + order.paymentRef : '') }}</p>
+          @if (order.riderName) {
+            <p class="row-item__meta">Rider: {{ order.riderName }}</p>
+          }
+          @if (order.status === 'Cancelled') {
+            <p class="row-item__meta">Cancelled by {{ order.cancelledBy === 'admin' ? 'the store' : 'the customer' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}</p>
+          }
+
+          <div class="order-foot">
+            <span class="order-total num">{{ order.total | peso }}</span>
+            <div class="order-actions">
+              @switch (order.status) {
+                @case ('Placed') {
+                  <ion-button size="small" (click)="startPreparing(order.id)">Start preparing</ion-button>
+                }
+                @case ('Preparing') {
+                  <span class="row-item__meta">Waiting for a rider</span>
+                }
+                @case ('Out for Delivery') {
+                  <span class="row-item__meta">With {{ order.riderName || 'a rider' }}</span>
+                }
+                @case ('Delivered') {
+                  <span class="row-item__meta">Delivered{{ order.riderName ? ' by ' + order.riderName : '' }}</span>
+                }
+              }
+              @if (canCancel(order)) {
+                <ion-button size="small" fill="outline" color="danger" (click)="cancel(order)">Cancel</ion-button>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    }
+  </div>
+</ion-content>
+
+<ion-footer>
+  <app-role-tab-bar role="admin" />
+</ion-footer>

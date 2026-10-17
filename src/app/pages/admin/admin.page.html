@@ -1,0 +1,229 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Products</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page page--wide stack admin-page">
+    <!-- Inventory at a glance: each card is also a filter -->
+    <div class="stat-grid" role="group" aria-label="Filter by stock">
+      <button type="button" class="stat" [class.is-active]="stockFilter() === 'all'"
+        [attr.aria-pressed]="stockFilter() === 'all'" (click)="setStockFilter('all')">
+        <span class="stat__value num">{{ stats().total }}</span>
+        <span class="stat__label">All products</span>
+      </button>
+      <button type="button" class="stat stat--warning" [class.is-active]="stockFilter() === 'low'"
+        [attr.aria-pressed]="stockFilter() === 'low'" (click)="setStockFilter('low')">
+        <span class="stat__value num">{{ stats().low }}</span>
+        <span class="stat__label">Low stock</span>
+      </button>
+      <button type="button" class="stat stat--danger" [class.is-active]="stockFilter() === 'out'"
+        [attr.aria-pressed]="stockFilter() === 'out'" (click)="setStockFilter('out')">
+        <span class="stat__value num">{{ stats().out }}</span>
+        <span class="stat__label">Out of stock</span>
+      </button>
+    </div>
+
+    <ion-searchbar
+      class="search"
+      placeholder="Search products"
+      [debounce]="200"
+      [value]="search()"
+      (ionInput)="search.set($event.detail.value ?? '')">
+    </ion-searchbar>
+
+    <!-- Categories: scroll sideways -->
+    <div class="chip-row" role="group" aria-label="Categories">
+      @for (tab of categoryTabs; track tab) {
+        <button type="button" class="filter-chip" [class.is-active]="categoryFilter() === tab"
+          [attr.aria-pressed]="categoryFilter() === tab" (click)="selectCategory(tab, $event)">
+          {{ tab }}
+          <span class="chip-count">{{ categoryCounts()[tab] }}</span>
+        </button>
+      }
+    </div>
+
+    <p class="result-count">{{ products().length }} {{ products().length === 1 ? 'product' : 'products' }}</p>
+
+    @if (products().length === 0) {
+      <app-empty-state
+        icon="cube-outline"
+        title="No products found"
+        [text]="search() ? 'Nothing matches “' + search() + '”.' : 'Nothing at this stock level.'">
+        <ion-button fill="outline" (click)="search.set(''); stockFilter.set('all'); categoryFilter.set('All')">Show all</ion-button>
+      </app-empty-state>
+    } @else {
+      <ion-list class="admin-list" lines="none">
+        @for (product of products(); track product.id) {
+          <ion-item class="admin-row" button detail="false" (click)="startEdit(product)"
+            [attr.aria-label]="'Edit ' + product.name">
+            <app-product-image class="thumb thumb--lg" slot="start" [src]="product.image" [name]="product.name" [category]="product.category" />
+            <ion-label>
+              <p class="product-name">{{ product.name }}</p>
+              <p class="row-item__meta">{{ product.category }} · <strong class="price num">{{ product.price | peso }}</strong></p>
+              <span class="stock-bar" [attr.data-level]="stockLevel(product)" aria-hidden="true"><span [style.width.%]="product.stock > 50 ? 100 : product.stock * 2"></span></span>
+              <div class="row-foot">
+                @if (stockLevel(product) === 'out') {
+                  <span class="pill pill--danger">Out of stock</span>
+                } @else if (stockLevel(product) === 'low') {
+                  <span class="pill pill--warning">Low · {{ product.stock }} left</span>
+                } @else {
+                  <span class="pill pill--success">{{ product.stock }} in stock</span>
+                }
+                <span class="stepper" (click)="$event.stopPropagation()">
+                  <button type="button" class="stepper__btn" [disabled]="product.stock === 0"
+                    (click)="changeStock(product, -1)" [attr.aria-label]="'One less ' + product.name">
+                    <ion-icon name="remove" aria-hidden="true"></ion-icon>
+                  </button>
+                  <button type="button" class="stepper__btn"
+                    (click)="changeStock(product, 1)" [attr.aria-label]="'One more ' + product.name">
+                    <ion-icon name="add" aria-hidden="true"></ion-icon>
+                  </button>
+                </span>
+              </div>
+            </ion-label>
+            <span slot="end" class="row-actions">
+              <ion-icon name="create-outline" class="row-edit" aria-hidden="true"></ion-icon>
+              <ion-button class="row-delete" fill="clear" color="danger"
+                (click)="$event.stopPropagation(); askDelete(product)"
+                [attr.aria-label]="'Delete ' + product.name">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-button>
+            </span>
+          </ion-item>
+        }
+      </ion-list>
+    }
+  </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="startAdd()" aria-label="Add product">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
+
+<!-- Add / edit form: a modal, so it is always in view however far the list is scrolled -->
+<ion-modal [isOpen]="formOpen()" (didDismiss)="cancelForm()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title class="form-title">{{ editingId() === null ? 'Add product' : 'Edit product' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cancelForm()" aria-label="Close">
+            <ion-icon slot="icon-only" name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <form class="page stack product-form" (submit)="$event.preventDefault(); saveForm()">
+        <ion-input
+          class="field"
+          fill="outline"
+          label="Name"
+          labelPlacement="floating"
+          [value]="fName()"
+          (ionInput)="fName.set($event.detail.value ?? '')">
+        </ion-input>
+
+        <ion-input
+          class="field"
+          fill="outline"
+          label="Short description"
+          labelPlacement="floating"
+          [value]="fDescription()"
+          (ionInput)="fDescription.set($event.detail.value ?? '')">
+        </ion-input>
+
+        <ion-select
+          class="field"
+          fill="outline"
+          label="Category"
+          labelPlacement="floating"
+          [value]="fCategory()"
+          [interfaceOptions]="{ header: 'Category' }"
+          (ionChange)="fCategory.set($event.detail.value ?? '')">
+          @for (category of categories; track category) {
+            <ion-select-option [value]="category">{{ category }}</ion-select-option>
+          }
+        </ion-select>
+
+        <ion-input
+          class="field"
+          fill="outline"
+          label="Price (₱)"
+          labelPlacement="floating"
+          type="number"
+          inputmode="decimal"
+          min="0"
+          step="1"
+          [value]="fPrice()"
+          (ionInput)="fPrice.set($event.detail.value ?? '')">
+        </ion-input>
+
+        <ion-input
+          class="field"
+          fill="outline"
+          label="Stock"
+          labelPlacement="floating"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          step="1"
+          [value]="fStock()"
+          (ionInput)="fStock.set($event.detail.value ?? '')">
+        </ion-input>
+
+        <ion-input
+          class="field"
+          fill="outline"
+          label="Image URL (optional)"
+          labelPlacement="floating"
+          type="url"
+          [value]="fImage()"
+          (ionInput)="fImage.set($event.detail.value ?? '')">
+        </ion-input>
+
+        <div class="photo-row">
+          @if (fImage()) {
+            <img class="photo-preview" [src]="fImage()" alt="Product photo preview" />
+          }
+          <input #photo type="file" accept="image/*" hidden (change)="onPhotoChosen($event)" />
+          <ion-button fill="outline" size="small" [disabled]="uploading()" (click)="photo.click()">
+            <ion-icon slot="start" name="image-outline" aria-hidden="true"></ion-icon>
+            {{ uploading() ? 'Uploading…' : 'Upload a photo' }}
+          </ion-button>
+        </div>
+
+        <ion-toggle justify="start" [checked]="fBestSeller()" (ionChange)="fBestSeller.set(!!$event.detail.checked)">
+          Best seller
+        </ion-toggle>
+
+        @if (formError()) {
+          <p class="form-error" role="alert">
+            <ion-icon name="alert-circle" aria-hidden="true"></ion-icon>
+            {{ formError() }}
+          </p>
+        }
+      </form>
+    </ion-content>
+
+    <ion-footer>
+      <ion-toolbar class="form-actions">
+        <ion-button expand="block" (click)="saveForm()">
+          {{ editingId() === null ? 'Add product' : 'Save changes' }}
+        </ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+<ion-footer>
+  <app-role-tab-bar role="admin" />
+</ion-footer>

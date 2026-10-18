@@ -230,7 +230,17 @@ export class AppComponent {
       title: 'Deliver',
       items: [
         { label: 'Deliveries', url: '/rider', icon: 'bicycle-outline', roles: ['rider'] },
+      ],
+    },
+    {
+      title: 'My Earnings',
+      items: [
         { label: 'Earnings', url: '/rider/earnings', icon: 'wallet-outline', roles: ['rider'] },
+      ],
+    },
+    {
+      title: 'Account',
+      items: [
         { label: 'My profile', url: '/rider/profile', icon: 'person-circle-outline', roles: ['rider'] },
         { label: 'Settings', url: '/settings', icon: 'settings-outline', roles: ['rider'] },
       ],
@@ -239,16 +249,27 @@ export class AppComponent {
 
   protected readonly vendorSections: MenuSection[] = [
     {
-      title: 'Manage',
+      title: 'Dashboard',
+      items: [{ label: 'Overview', url: '/admin', icon: 'grid-outline', roles: ['admin'] }],
+    },
+    {
+      title: 'Catalog',
       items: [
-        { label: 'Overview', url: '/admin', icon: 'grid-outline', roles: ['admin'] },
         { label: 'Products', url: '/admin/products', icon: 'storefront-outline', roles: ['admin'] },
-        { label: 'Promo codes', url: '/admin/promos', icon: 'pricetags-outline', roles: ['admin'] },
         { label: 'Inventory', url: '/admin/inventory', icon: 'cube-outline', roles: ['admin'] },
+        { label: 'Promo codes', url: '/admin/promos', icon: 'pricetags-outline', roles: ['admin'] },
+      ],
+    },
+    {
+      title: 'Sales & Customers',
+      items: [
         { label: 'Orders', url: '/admin/orders', icon: 'receipt-outline', roles: ['admin'] },
         { label: 'Reviews', url: '/admin/reviews', icon: 'chatbubble-ellipses-outline', roles: ['admin'] },
-        { label: 'Settings', url: '/settings', icon: 'settings-outline', roles: ['admin'] },
       ],
+    },
+    {
+      title: 'Account',
+      items: [{ label: 'Settings', url: '/settings', icon: 'settings-outline', roles: ['admin'] }],
     },
   ];
 

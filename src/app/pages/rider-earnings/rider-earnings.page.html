@@ -9,44 +9,76 @@
 
 <ion-content>
   <div class="page page--wide stack">
+    <!-- Today -->
     <section class="card card--hero total">
-      <p class="muted">Earned today</p>
+      <p class="total__label">Earned today</p>
       <p class="total__value num">{{ rider.today().earnings | peso }}</p>
-      <p class="muted">{{ rider.today().deliveries }} {{ rider.today().deliveries === 1 ? 'delivery' : 'deliveries' }}</p>
+      <p class="total__sub">{{ rider.today().deliveries }} {{ rider.today().deliveries === 1 ? 'delivery' : 'deliveries' }}</p>
     </section>
 
+    <!-- Last 7 days chart -->
+    <section class="card">
+      <div class="section-head">
+        <h2 class="section-title">Last 7 days</h2>
+        <span class="muted num">{{ rider.week().earnings | peso }}</span>
+      </div>
+      <div class="chart" role="img" [attr.aria-label]="'Earnings for the last 7 days: ' + (rider.week().earnings | peso)">
+        @for (day of days(); track day.key; let i = $index) {
+          <div class="chart__col" [class.is-today]="day.today">
+            <span class="chart__amount num">{{ day.earnings > 0 ? (day.earnings | peso) : '' }}</span>
+            <span class="chart__track">
+              <span class="chart__bar" [style.height.%]="day.percent" [style.animation-delay.ms]="i * 70"></span>
+            </span>
+            <span class="chart__day">{{ day.label }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Totals -->
     <section class="grid">
       <div class="tile">
-        <span class="tile__label">Last 7 days</span>
-        <span class="tile__value num">{{ rider.week().earnings | peso }}</span>
-        <span class="tile__sub">{{ rider.week().deliveries }} deliveries</span>
+        <span class="tile__icon"><ion-icon name="receipt-outline" aria-hidden="true"></ion-icon></span>
+        <span class="tile__label">This week</span>
+        <span class="tile__value num">{{ rider.week().deliveries }}</span>
+        <span class="tile__sub">deliveries</span>
       </div>
       <div class="tile">
+        <span class="tile__icon"><ion-icon name="wallet-outline" aria-hidden="true"></ion-icon></span>
         <span class="tile__label">All time</span>
         <span class="tile__value num">{{ rider.allTime().earnings | peso }}</span>
         <span class="tile__sub">{{ rider.allTime().deliveries }} deliveries</span>
       </div>
     </section>
 
-    <section class="card">
-      <div class="section-head"><h2 class="section-title">Cash to hand in</h2></div>
-      <p class="cash num">{{ rider.cashOnHand() | peso }}</p>
-      <p class="row-item__meta">Cash on Delivery payments you collected.</p>
+    <!-- Cash -->
+    <section class="cash-card" [class.is-zero]="rider.cashOnHand() === 0">
+      <span class="cash-card__icon"><ion-icon name="cash-outline" aria-hidden="true"></ion-icon></span>
+      <div class="cash-card__text">
+        <p class="cash-card__label">Cash to hand in</p>
+        <p class="cash num">{{ rider.cashOnHand() | peso }}</p>
+        <p class="cash-card__hint">Cash on Delivery payments you collected.</p>
+      </div>
     </section>
 
+    <!-- History -->
     <section class="card">
-      <div class="section-head"><h2 class="section-title">Delivery history</h2></div>
+      <div class="section-head">
+        <h2 class="section-title">Delivery history</h2>
+        <span class="muted">{{ rider.completed().length }}</span>
+      </div>
       @if (rider.completed().length === 0) {
         <app-empty-state icon="receipt-outline" title="No deliveries yet" text="Finished deliveries and their earnings show up here." />
       } @else {
-        <ul class="row-list">
+        <ul class="history">
           @for (order of rider.completed(); track order.id) {
-            <li class="row-item">
-              <div class="row-item__main">
-                <p class="row-item__title">{{ order.id }} · {{ order.shipping.fullName }}</p>
-                <p class="row-item__meta">{{ deliveredAt(order) | date: 'MMM d, h:mm a' }} · {{ order.shipping.city }}</p>
+            <li class="hist">
+              <span class="hist__icon"><ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon></span>
+              <div class="hist__main">
+                <strong>{{ order.shipping.fullName }}</strong>
+                <small>{{ order.id }} · {{ deliveredAt(order) | date: 'MMM d, h:mm a' }} · {{ order.shipping.city }}</small>
               </div>
-              <span class="row-item__value num">+{{ order.deliveryFee | peso }}</span>
+              <span class="hist__fee num">+{{ order.deliveryFee | peso }}</span>
             </li>
           }
         </ul>

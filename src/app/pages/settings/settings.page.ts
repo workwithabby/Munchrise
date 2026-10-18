@@ -19,6 +19,9 @@ import {
 
 import { AuthService } from '../../services/auth.service';
 
+/** Largest photo we keep (stored as a data URL). */
+const MAX_PHOTO_BYTES = 1_500_000;
+
 interface SettingsLink {
   label: string;
   url: string;
@@ -58,6 +61,16 @@ export class SettingsPage {
   readonly error = signal('');
   readonly saving = signal(false);
 
+  /** Name being edited; starts from the saved name. */
+  readonly name = signal(this.auth.user()?.name ?? '');
+  readonly photoFailed = signal(false);
+
+  readonly avatarUrl = computed(() => this.auth.user()?.avatar ?? 'assets/avatars/default.png');
+  readonly initials = computed(() => {
+    const parts = this.auth.displayName().trim().split(/\s+/);
+    return ((parts[0]?.[0] ?? 'G') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  });
+
   readonly roleLabel = computed(() => {
     const role = this.auth.user()?.role ?? 'guest';
     return { guest: 'Guest', user: 'Customer', admin: 'Vendor / Admin', rider: 'Rider' }[role];
@@ -89,6 +102,45 @@ export class SettingsPage {
         return [];
     }
   });
+
+  saveName(): void {
+    const full = this.name().trim().replace(/\s+/g, ' ');
+    if (!full) {
+      void this.toast('Please enter your name.', 'danger');
+      return;
+    }
+    const [firstName, ...rest] = full.split(' ');
+    this.auth.updateProfile({ name: full, firstName, lastName: rest.join(' ') });
+    this.name.set(full);
+    void this.toast('Name updated.');
+  }
+
+  pickPhoto(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      void this.toast('Please choose an image file.', 'danger');
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      void this.toast('Please pick a smaller photo (under 1.5 MB).', 'danger');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.auth.updateProfile({ avatar: String(reader.result) });
+      this.photoFailed.set(false);
+      void this.toast('Profile photo updated!');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private async toast(message: string, color: 'primary' | 'danger' = 'primary'): Promise<void> {
+    const toast = await this.toastController.create({ message, duration: 1800, position: 'top', color });
+    await toast.present();
+  }
 
   async changePassword(): Promise<void> {
     if (this.next() !== this.confirm()) {

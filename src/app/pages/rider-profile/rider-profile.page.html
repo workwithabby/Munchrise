@@ -9,46 +9,96 @@
 
 <ion-content>
   <div class="page page--narrow stack">
-    <section class="card form-stack">
+    <!-- Identity card -->
+    <section class="me">
+      @if (auth.user()?.avatar && !photoFailed()) {
+        <img class="me__avatar" [src]="auth.user()?.avatar" alt="Profile photo" (error)="photoFailed.set(true)" />
+      } @else {
+        <span class="me__avatar me__avatar--fallback" aria-hidden="true">{{ initials() }}</span>
+      }
+      <div class="me__text">
+        <h1>{{ auth.displayName() }}</h1>
+        <p>{{ rider.vehicle() }}{{ rider.plate() ? ' · ' + rider.plate() : '' }}</p>
+      </div>
+      <div class="me__stats">
+        <div><strong class="num">{{ rider.allTime().deliveries }}</strong><span>Deliveries</span></div>
+        <div>
+          <strong class="num">{{ ratings.mine().length === 0 ? '–' : ratings.average().toFixed(1) }}</strong>
+          <span>Rating</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Availability -->
+    <button type="button" class="avail" [class.is-online]="rider.online()" [attr.aria-pressed]="rider.online()"
+      (click)="rider.setOnline(!rider.online())">
+      <ion-icon [name]="rider.online() ? 'bicycle-outline' : 'moon-outline'" aria-hidden="true"></ion-icon>
+      <span class="avail__text">
+        <strong>{{ rider.online() ? 'You are online' : 'You are offline' }}</strong>
+        <small>{{ rider.online() ? 'You can take new orders.' : 'Tap to start taking orders.' }}</small>
+      </span>
+      <span class="avail__switch" aria-hidden="true"></span>
+    </button>
+
+    <!-- Details -->
+    <section class="fsec form-stack">
+      <h2 class="fsec__title"><ion-icon name="person-circle-outline" aria-hidden="true"></ion-icon> My details</h2>
       <ion-input class="field" label="Full name" labelPlacement="floating" fill="outline"
         [value]="name()" (ionInput)="name.set($event.detail.value ?? '')"></ion-input>
       <ion-input class="field" label="Phone" labelPlacement="floating" fill="outline" type="tel"
         [value]="phone()" (ionInput)="phone.set($event.detail.value ?? '')"></ion-input>
-      <ion-select class="field" label="Vehicle" labelPlacement="floating" fill="outline" interface="popover"
-        [value]="vehicle()" (ionChange)="vehicle.set($event.detail.value)">
+
+      <p class="fsec__label">Vehicle</p>
+      <div class="vehicles" role="radiogroup" aria-label="Vehicle">
         @for (v of vehicles; track v) {
-          <ion-select-option [value]="v">{{ v }}</ion-select-option>
+          <button type="button" role="radio" class="vehicle" [class.is-active]="vehicle() === v"
+            [attr.aria-checked]="vehicle() === v" (click)="vehicle.set(v)">
+            <ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon>
+            {{ v }}
+          </button>
         }
-      </ion-select>
+      </div>
+
       <ion-input class="field" label="Plate number (optional)" labelPlacement="floating" fill="outline"
         [value]="plate()" (ionInput)="plate.set($event.detail.value ?? '')"></ion-input>
 
       @if (error()) {
         <p class="form-error"><ion-icon name="alert-circle" aria-hidden="true"></ion-icon> {{ error() }}</p>
       }
-      <ion-button expand="block" (click)="save()">Save changes</ion-button>
+      <ion-button expand="block" (click)="save()">
+        <ion-icon slot="start" name="checkmark" aria-hidden="true"></ion-icon>
+        Save changes
+      </ion-button>
     </section>
 
-    <section class="card">
-      <ion-toggle justify="space-between" [checked]="rider.online()"
-        (ionChange)="rider.setOnline(!!$event.detail.checked)">Available for orders</ion-toggle>
-    </section>
-
-    <section class="card">
-      <h2 class="section-title">My ratings</h2>
+    <!-- Ratings -->
+    <section class="fsec">
+      <h2 class="fsec__title"><ion-icon name="star-outline" aria-hidden="true"></ion-icon> My ratings</h2>
       @if (ratings.mine().length === 0) {
         <p class="muted">No ratings yet. Customers can rate you after a delivery.</p>
       } @else {
-        <p><strong>{{ ratings.average().toFixed(1) }}</strong> / 5 from {{ ratings.mine().length }} {{ ratings.mine().length === 1 ? 'rating' : 'ratings' }}</p>
-        <ul class="row-list">
+        <div class="score">
+          <span class="score__value num">{{ ratings.average().toFixed(1) }}</span>
+          <div>
+            <span class="stars" aria-hidden="true">
+              @for (s of stars; track s) {<ion-icon [name]="s <= roundedAverage() ? 'star' : 'star-outline'"></ion-icon>}
+            </span>
+            <small>from {{ ratings.mine().length }} {{ ratings.mine().length === 1 ? 'rating' : 'ratings' }}</small>
+          </div>
+        </div>
+        <ul class="rate-list">
           @for (r of ratings.mine().slice(0, 10); track r.id) {
-            <li class="row-item">
-              <div class="row-item__main">
-                <p class="row-item__title">
-                  @for (s of stars; track s) {<ion-icon [name]="s <= r.rating ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>}
-                  <span class="muted"> {{ r.author }} · {{ r.createdAt | date: 'MMM d' }}</span>
-                </p>
-                @if (r.comment) { <p class="row-item__meta">{{ r.comment }}</p> }
+            <li class="rate">
+              <span class="rate__avatar" aria-hidden="true">{{ (r.author || '?').charAt(0).toUpperCase() }}</span>
+              <div class="rate__main">
+                <div class="rate__top">
+                  <strong>{{ r.author }}</strong>
+                  <span class="stars stars--sm" role="img" [attr.aria-label]="r.rating + ' out of 5 stars'">
+                    @for (s of stars; track s) {<ion-icon [name]="s <= r.rating ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>}
+                  </span>
+                </div>
+                <small>{{ r.createdAt | date: 'MMM d' }}</small>
+                @if (r.comment) { <p>“{{ r.comment }}”</p> }
               </div>
             </li>
           }

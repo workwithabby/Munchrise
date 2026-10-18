@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonInput, IonMenuButton, IonSelect, IonSelectOption, IonTitle, IonToggle, IonToolbar, ToastController, IonFooter } from '@ionic/angular';
+import { Component, computed, inject, signal } from '@angular/core';
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonInput, IonMenuButton, IonTitle, IonToolbar, ToastController, IonFooter } from '@ionic/angular';
 import { RoleTabBarComponent } from '../../components/role-tab-bar/role-tab-bar.component';
 
 import { AuthService } from '../../services/auth.service';
@@ -11,8 +11,9 @@ import { RiderService, Vehicle } from '../../services/rider.service';
 @Component({
   selector: 'app-rider-profile',
   templateUrl: './rider-profile.page.html',
+  styleUrls: ['./rider-profile.page.scss'],
   standalone: true,
-  imports: [DatePipe, RoleTabBarComponent, IonFooter, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonInput, IonMenuButton, IonSelect, IonSelectOption, IonTitle, IonToggle, IonToolbar],
+  imports: [DatePipe, RoleTabBarComponent, IonFooter, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonInput, IonMenuButton, IonTitle, IonToolbar],
 })
 export class RiderProfilePage {
   protected readonly auth = inject(AuthService);
@@ -28,6 +29,14 @@ export class RiderProfilePage {
   readonly vehicle = signal<Vehicle>(this.rider.vehicle());
   readonly plate = signal(this.rider.plate());
   readonly error = signal('');
+  readonly photoFailed = signal(false);
+
+  readonly roundedAverage = computed(() => Math.round(this.ratings.average()));
+
+  readonly initials = computed(() => {
+    const parts = this.auth.displayName().trim().split(/\s+/);
+    return ((parts[0]?.[0] ?? 'R') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  });
 
   async save(): Promise<void> {
     const name = this.name().trim();

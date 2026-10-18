@@ -19,7 +19,6 @@ const ADMIN_TABS: RoleTab[] = [
   { path: '/admin/products', label: 'Products', icon: 'storefront-outline', iconActive: 'storefront' },
   { path: '/admin/inventory', label: 'Stock', icon: 'cube-outline', iconActive: 'cube' },
   { path: '/admin/orders', label: 'Orders', icon: 'receipt-outline', iconActive: 'receipt', badge: 'placed' },
-  { path: '/admin/reviews', label: 'Reviews', icon: 'chatbubble-ellipses-outline', iconActive: 'chatbubble-ellipses' },
 ];
 
 const RIDER_TABS: RoleTab[] = [

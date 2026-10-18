@@ -8,31 +8,94 @@
 </ion-header>
 
 <ion-content>
-  <div class="page page--wide stack">
-    <div class="kpi-grid">
-      <div class="kpi kpi--brand">
-        <span class="kpi__label">Revenue</span>
-        <span class="kpi__value num">{{ revenue() | peso }}</span>
+  <div class="page page--wide stack ov">
+    <!-- Greeting -->
+    <section class="ov-hero">
+      <div>
+        <p class="ov-hero__date">{{ today | date: 'EEEE, MMM d' }}</p>
+        <h1>{{ greeting() }}, {{ firstName() }}!</h1>
+        <p class="ov-hero__sub">
+          @if (pendingCount() > 0) {
+            You have <strong>{{ pendingCount() }}</strong> {{ pendingCount() === 1 ? 'order' : 'orders' }} in progress.
+          } @else {
+            No orders waiting. Nice and calm.
+          }
+        </p>
       </div>
-      <a class="kpi" routerLink="/admin/orders">
-        <span class="kpi__label">Orders</span>
-        <span class="kpi__value num">{{ orderCount() }}</span>
-        <span class="kpi__hint">{{ pendingCount() }} in progress</span>
+      <div class="ov-hero__revenue">
+        <span>Revenue</span>
+        <strong class="num">{{ revenue() | peso }}</strong>
+      </div>
+    </section>
+
+    <!-- KPI tiles -->
+    <div class="ov-kpis">
+      <a class="ov-kpi" routerLink="/admin/orders" style="--i: 0">
+        <span class="ov-kpi__icon ov-kpi__icon--orange"><ion-icon name="receipt-outline" aria-hidden="true"></ion-icon></span>
+        <span class="ov-kpi__value num">{{ orderCount() }}</span>
+        <span class="ov-kpi__label">Orders</span>
       </a>
-      <a class="kpi" routerLink="/admin/products">
-        <span class="kpi__label">Products</span>
-        <span class="kpi__value num">{{ stock().total }}</span>
+      <a class="ov-kpi" routerLink="/admin/products" style="--i: 1">
+        <span class="ov-kpi__icon ov-kpi__icon--teal"><ion-icon name="storefront-outline" aria-hidden="true"></ion-icon></span>
+        <span class="ov-kpi__value num">{{ stock().total }}</span>
+        <span class="ov-kpi__label">Products</span>
       </a>
-      <a class="kpi" routerLink="/admin/inventory">
-        <span class="kpi__label">Need restock</span>
-        <span class="kpi__value num">{{ stock().low.length + stock().out.length }}</span>
-        <span class="kpi__hint">{{ stock().out.length }} out of stock</span>
+      <a class="ov-kpi" [class.ov-kpi--alert]="restockCount() > 0" routerLink="/admin/inventory" style="--i: 2">
+        <span class="ov-kpi__icon ov-kpi__icon--red"><ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon></span>
+        <span class="ov-kpi__value num">{{ restockCount() }}</span>
+        <span class="ov-kpi__label">Need restock</span>
+      </a>
+      <a class="ov-kpi" routerLink="/admin/reviews" style="--i: 3">
+        <span class="ov-kpi__icon ov-kpi__icon--gold"><ion-icon name="chatbubble-ellipses-outline" aria-hidden="true"></ion-icon></span>
+        <span class="ov-kpi__value num">{{ reviewCount() }}</span>
+        <span class="ov-kpi__label">Reviews</span>
       </a>
     </div>
 
-    <section class="card">
+    <!-- Order pipeline -->
+    <section class="card ov-card">
       <div class="section-head">
-        <h2>Stock alerts</h2>
+        <h2><ion-icon name="git-compare-outline" aria-hidden="true"></ion-icon> Order pipeline</h2>
+        <a class="section-link" routerLink="/admin/orders">Manage</a>
+      </div>
+      <div class="pipeline">
+        @for (step of pipeline(); track step.status) {
+          <a class="pipe" routerLink="/admin/orders" [attr.data-tone]="step.tone">
+            <span class="pipe__count num">{{ step.count }}</span>
+            <span class="pipe__label">{{ step.status }}</span>
+          </a>
+        }
+      </div>
+    </section>
+
+    <!-- Best sellers -->
+    <section class="card ov-card">
+      <div class="section-head">
+        <h2><ion-icon name="trophy-outline" aria-hidden="true"></ion-icon> Best sellers</h2>
+      </div>
+      @if (topSellers().length === 0) {
+        <p class="muted">Sales will show up here after the first orders.</p>
+      } @else {
+        <ul class="plain-list">
+          @for (item of topSellers(); track item.name; let i = $index) {
+            <li class="bar-row">
+              <div class="bar-row__top">
+                <span class="plain-row__name"><span class="rank">{{ i + 1 }}</span>{{ item.name }}</span>
+                <span class="num muted">{{ item.qty }} sold</span>
+              </div>
+              <div class="bar" aria-hidden="true">
+                <span class="bar__fill" [style.width.%]="(item.qty / maxQty()) * 100" [style.animation-delay.ms]="i * 90"></span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Stock alerts -->
+    <section class="card ov-card">
+      <div class="section-head">
+        <h2><ion-icon name="cube-outline" aria-hidden="true"></ion-icon> Stock alerts</h2>
         <a class="section-link" routerLink="/admin/inventory">Restock</a>
       </div>
       @if (alerts().length === 0) {
@@ -53,32 +116,10 @@
       }
     </section>
 
-    <section class="card">
+    <!-- Latest orders -->
+    <section class="card ov-card">
       <div class="section-head">
-        <h2>Best sellers</h2>
-      </div>
-      @if (topSellers().length === 0) {
-        <p class="muted">Sales will show up here after the first orders.</p>
-      } @else {
-        <ul class="plain-list">
-          @for (item of topSellers(); track item.name) {
-            <li class="bar-row">
-              <div class="bar-row__top">
-                <span class="plain-row__name">{{ item.name }}</span>
-                <span class="num muted">{{ item.qty }} sold</span>
-              </div>
-              <div class="bar" aria-hidden="true">
-                <span class="bar__fill" [style.width.%]="(item.qty / maxQty()) * 100"></span>
-              </div>
-            </li>
-          }
-        </ul>
-      }
-    </section>
-
-    <section class="card">
-      <div class="section-head">
-        <h2>Latest orders</h2>
+        <h2><ion-icon name="time-outline" aria-hidden="true"></ion-icon> Latest orders</h2>
         <a class="section-link" routerLink="/admin/orders">See all</a>
       </div>
       @if (recentOrders().length === 0) {
@@ -86,26 +127,35 @@
       } @else {
         <ul class="plain-list">
           @for (order of recentOrders(); track order.id) {
-            <li class="plain-row">
-              <span class="plain-row__name">{{ order.id }} · {{ order.shipping.fullName }}</span>
-              <span class="num">{{ order.total | peso }}</span>
+            <li>
+              <a class="recent" routerLink="/admin/orders">
+                <span class="recent__main">
+                  <strong>{{ order.shipping.fullName }}</strong>
+                  <small>{{ order.id }} · {{ order.placedAt | date: 'MMM d, h:mm a' }}</small>
+                </span>
+                <span class="recent__side">
+                  <span class="num">{{ order.total | peso }}</span>
+                  <span class="pill" [class]="statusClass(order.status)">{{ order.status }}</span>
+                </span>
+              </a>
             </li>
           }
         </ul>
       }
     </section>
 
-    <a class="card link-card" routerLink="/admin/reviews">
-      <ion-icon name="chatbubble-ellipses-outline" aria-hidden="true"></ion-icon>
-      <span>{{ reviewCount() }} customer reviews</span>
-      <ion-icon name="arrow-forward" aria-hidden="true" class="link-card__go"></ion-icon>
-    </a>
-
-    <a class="card link-card" routerLink="/admin/users">
-      <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
-      <span>Staff &amp; roles</span>
-      <ion-icon name="arrow-forward" aria-hidden="true" class="link-card__go"></ion-icon>
-    </a>
+    <!-- Shortcuts -->
+    <div class="shortcuts">
+      <a class="shortcut" routerLink="/admin/products">
+        <ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon> Add product
+      </a>
+      <a class="shortcut" routerLink="/admin/promos">
+        <ion-icon name="pricetags-outline" aria-hidden="true"></ion-icon> Promo codes
+      </a>
+      <a class="shortcut" routerLink="/admin/users">
+        <ion-icon name="people-outline" aria-hidden="true"></ion-icon> Staff &amp; roles
+      </a>
+    </div>
   </div>
 </ion-content>
 

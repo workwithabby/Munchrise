@@ -9,8 +9,6 @@ import {
   IonIcon,
   IonInput,
   IonMenuButton,
-  IonSelect,
-  IonSelectOption,
   IonTitle,
   IonToggle,
   IonToolbar,
@@ -41,8 +39,6 @@ import { describePromo, PromoService } from '../../services/promo.service';
     IonIcon,
     IonInput,
     IonMenuButton,
-    IonSelect,
-    IonSelectOption,
     IonTitle,
     IonToggle,
     IonToolbar,
@@ -55,6 +51,30 @@ export class AdminPromosPage {
   private readonly toastController = inject(ToastController);
 
   readonly promos = computed(() => this.promoService.all());
+  readonly filter = signal<'all' | 'live' | 'off'>('all');
+  readonly formOpen = signal(true);
+
+  readonly shown = computed(() => {
+    const f = this.filter();
+    return this.promos().filter((p) => f === 'all' || (f === 'live' ? p.active !== false : p.active === false));
+  });
+
+  readonly quickValues = computed(() => (this.type() === 'percent' ? [5, 10, 15, 20, 25] : [20, 50, 100, 150]));
+
+  setType(type: 'percent' | 'fixed'): void {
+    this.type.set(type);
+    this.value.set('');
+  }
+
+  async copy(promo: PromoCode): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(promo.code);
+      await this.toast(`${promo.code} copied.`);
+    } catch {
+      await this.toast(`Code: ${promo.code}`);
+    }
+  }
+
   readonly activeCount = computed(() => this.promos().filter((p) => p.active !== false).length);
 
   // the "create" form

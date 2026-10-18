@@ -9,48 +9,93 @@
 
 <ion-content>
   <div class="page page--wide stack">
-    <div class="kpi-grid kpi-grid--3">
-      <div class="kpi kpi--danger">
-        <span class="kpi__label">Out of stock</span>
-        <span class="kpi__value num">{{ outCount() }}</span>
-      </div>
-      <div class="kpi kpi--warning">
-        <span class="kpi__label">Low (5 or less)</span>
-        <span class="kpi__value num">{{ lowCount() }}</span>
-      </div>
+    <!-- Stock health tiles: each one is also a filter -->
+    <div class="tiles" role="group" aria-label="Filter by stock level">
+      <button type="button" class="tile tile--danger" [class.is-active]="view() === 'out'"
+        [attr.aria-pressed]="view() === 'out'" (click)="pick('out')" style="--i: 0">
+        <ion-icon name="close-circle-outline" aria-hidden="true"></ion-icon>
+        <span class="tile__value num">{{ outCount() }}</span>
+        <span class="tile__label">Out of stock</span>
+      </button>
+      <button type="button" class="tile tile--warning" [class.is-active]="view() === 'low'"
+        [attr.aria-pressed]="view() === 'low'" (click)="pick('low')" style="--i: 1">
+        <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+        <span class="tile__value num">{{ lowCount() }}</span>
+        <span class="tile__label">Low (5 or less)</span>
+      </button>
+      <button type="button" class="tile tile--ok" [class.is-active]="view() === 'ok'"
+        [attr.aria-pressed]="view() === 'ok'" (click)="pick('ok')" style="--i: 2">
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+        <span class="tile__value num">{{ healthyCount() }}</span>
+        <span class="tile__label">Well stocked</span>
+      </button>
+      <button type="button" class="tile" [class.is-active]="view() === 'all'"
+        [attr.aria-pressed]="view() === 'all'" (click)="pick('all')" style="--i: 3">
+        <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+        <span class="tile__value num">{{ totalUnits() }}</span>
+        <span class="tile__label">Units in total</span>
+      </button>
     </div>
 
-    <div class="chip-row chip-row--wrap" role="group" aria-label="Show">
-      <button type="button" class="filter-chip" [class.is-active]="view() === 'attention'"
-        [attr.aria-pressed]="view() === 'attention'" (click)="view.set('attention')">Needs restock</button>
-      <button type="button" class="filter-chip" [class.is-active]="view() === 'all'"
-        [attr.aria-pressed]="view() === 'all'" (click)="view.set('all')">All products</button>
+    <ion-searchbar class="search" placeholder="Search products" [debounce]="200"
+      [value]="search()" (ionInput)="search.set($event.detail.value ?? '')"></ion-searchbar>
+
+    <div class="chip-row" role="group" aria-label="Show">
+      @for (tab of viewTabs; track tab.id) {
+        <button type="button" class="filter-chip" [class.is-active]="view() === tab.id"
+          [attr.aria-pressed]="view() === tab.id" (click)="pick(tab.id)">
+          {{ tab.label }}
+        </button>
+      }
     </div>
+
+    <p class="result-count">{{ items().length }} {{ items().length === 1 ? 'product' : 'products' }}</p>
 
     @if (items().length === 0) {
-      <app-empty-state icon="cube-outline" title="All stocked up" text="No product is running low right now." />
+      <app-empty-state icon="cube-outline" title="Nothing here"
+        [text]="search() ? 'Nothing matches “' + search() + '”.' : 'No product is in this group right now.'" />
     } @else {
-      <div class="stack stack--sm">
-        @for (product of items(); track product.id) {
-          <article class="card inv-card">
-            <div class="inv-card__top">
+      <div class="inv-grid">
+        @for (product of items(); track product.id; let i = $index) {
+          <article class="inv" [attr.data-level]="levelOf(product)" [style.--i]="i < 8 ? i : 8">
+            <div class="inv__top">
               <app-product-image class="thumb thumb--sm" [src]="product.image" [name]="product.name" [category]="product.category" />
-              <div class="inv-card__info">
-                <p class="inv-card__name">{{ product.name }}</p>
-                <p class="row-item__meta">{{ product.category }}</p>
+              <div class="inv__info">
+                <p class="inv__name">{{ product.name }}</p>
+                <p class="inv__cat">{{ product.category }}</p>
               </div>
-              @if (product.stock === 0) {
-                <span class="pill pill--danger">Out</span>
-              } @else if (product.stock <= 5) {
-                <span class="pill pill--warning">{{ product.stock }} left</span>
-              } @else {
-                <span class="pill pill--success">{{ product.stock }}</span>
-              }
+              <div class="inv__count">
+                <span class="inv__num num">{{ product.stock }}</span>
+                <span class="inv__badge">
+                  @switch (levelOf(product)) {
+                    @case ('out') { Out }
+                    @case ('low') { Low }
+                    @default { OK }
+                  }
+                </span>
+              </div>
             </div>
-            <div class="chip-row chip-row--wrap inv-card__actions" role="group" [attr.aria-label]="'Restock ' + product.name">
-              @for (amount of restockAmounts; track amount) {
-                <button type="button" class="filter-chip" (click)="restock(product, amount)">+{{ amount }}</button>
-              }
+
+            <div class="meter" aria-hidden="true">
+              <span class="meter__fill" [style.width.%]="meterPercent(product)"></span>
+            </div>
+
+            <div class="inv__controls">
+              <div class="stepper">
+                <button type="button" class="stepper__btn" [disabled]="product.stock === 0"
+                  (click)="restock(product, -1)" [attr.aria-label]="'One less ' + product.name">
+                  <ion-icon name="remove" aria-hidden="true"></ion-icon>
+                </button>
+                <button type="button" class="stepper__btn" (click)="restock(product, 1)"
+                  [attr.aria-label]="'One more ' + product.name">
+                  <ion-icon name="add" aria-hidden="true"></ion-icon>
+                </button>
+              </div>
+              <div class="quick" role="group" [attr.aria-label]="'Restock ' + product.name">
+                @for (amount of restockAmounts; track amount) {
+                  <button type="button" class="quick__btn" (click)="restock(product, amount)">+{{ amount }}</button>
+                }
+              </div>
             </div>
           </article>
         }

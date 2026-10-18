@@ -9,68 +9,128 @@
 
 <ion-content>
   <div class="page page--wide stack">
+    <!-- Attention banner -->
+    <section class="banner" [class.banner--calm]="newCount() === 0">
+      <ion-icon [name]="newCount() > 0 ? 'hourglass-outline' : 'checkmark-circle-outline'" aria-hidden="true"></ion-icon>
+      <div>
+        @if (newCount() > 0) {
+          <strong>{{ newCount() }} new {{ newCount() === 1 ? 'order' : 'orders' }} waiting</strong>
+          <span>Start preparing to let riders know.</span>
+        } @else {
+          <strong>All caught up</strong>
+          <span>No new orders waiting for the kitchen.</span>
+        }
+      </div>
+      @if (newCount() > 0 && filter() !== 'Placed') {
+        <button type="button" class="banner__btn" (click)="filter.set('Placed')">View</button>
+      }
+    </section>
+
+    <ion-searchbar class="search" placeholder="Search order no. or customer" [debounce]="200"
+      [value]="search()" (ionInput)="search.set($event.detail.value ?? '')"></ion-searchbar>
+
+    <!-- Status filter: compact chips -->
     <div class="chip-row" role="group" aria-label="Filter by status">
       @for (item of filters; track item) {
         <button type="button" class="filter-chip" [class.is-active]="filter() === item"
           [attr.aria-pressed]="filter() === item" (click)="filter.set(item)">
+          <ion-icon [name]="iconFor(item)" aria-hidden="true"></ion-icon>
           {{ item }}
           <span class="chip-count">{{ countFor(item) }}</span>
         </button>
       }
     </div>
 
+    <p class="result-count">{{ orders().length }} {{ orders().length === 1 ? 'order' : 'orders' }}</p>
+
     @if (orders().length === 0) {
       <app-empty-state icon="receipt-outline" title="No orders here"
-        [text]="filter() === 'All' ? 'Orders appear after customers check out.' : 'No order is ' + filter() + ' right now.'" />
+        [text]="search() ? 'Nothing matches “' + search() + '”.' : filter() === 'All' ? 'Orders appear after customers check out.' : 'No order is ' + filter() + ' right now.'" />
     } @else {
-      @for (order of orders(); track order.id) {
-        <article class="card order-card">
-          <div class="order-head">
-            <div>
-              <p class="order-id">{{ order.id }}</p>
-              <p class="row-item__meta">{{ order.placedAt | date: 'MMM d, h:mm a' }}</p>
-            </div>
-            <span class="pill" [class]="statusClass(order.status)">{{ order.status }}</span>
-          </div>
+      <div class="order-grid">
+        @for (order of orders(); track order.id; let i = $index) {
+          <article class="oc" [class.is-open]="isOpen(order.id)" [attr.data-tone]="toneFor(order.status)"
+            [style.--i]="i < 8 ? i : 8">
 
-          <ul class="order-lines">
-            @for (line of order.items; track line.productId) {
-              <li><span>{{ line.quantity }}× {{ line.name }}</span><span class="num">{{ line.price * line.quantity | peso }}</span></li>
+            <header class="oc__top">
+              <div>
+                <p class="oc__id num">{{ order.id }}</p>
+                <p class="oc__time">{{ order.placedAt | date: 'MMM d · h:mm a' }}</p>
+              </div>
+              <span class="pill" [class]="statusClass(order.status)">{{ order.status }}</span>
+            </header>
+
+            <div class="oc__who">
+              <span class="oc__avatar" aria-hidden="true">{{ initials(order.shipping.fullName) }}</span>
+              <div class="oc__who-text">
+                <strong>{{ order.shipping.fullName }}</strong>
+                <span>{{ summary(order) }}</span>
+              </div>
+              <span class="oc__total num">{{ order.total | peso }}</span>
+            </div>
+
+            @if (order.status !== 'Cancelled') {
+              <ol class="steps" aria-label="Progress">
+                @for (step of flow; track step; let s = $index) {
+                  <li [class.done]="s <= stepOf(order)" [class.now]="s === stepOf(order)">
+                    <span class="steps__dot"></span>
+                    <span class="steps__label">{{ step === 'Out for Delivery' ? 'On the way' : step }}</span>
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p class="cancel-note">
+                <ion-icon name="close-circle" aria-hidden="true"></ion-icon>
+                Cancelled by {{ order.cancelledBy === 'admin' ? 'the store' : 'the customer' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}
+              </p>
             }
-          </ul>
 
-          <p class="row-item__meta">{{ order.shipping.fullName }} · {{ order.shipping.city }} · {{ order.payment }} · {{ order.payment === 'Cash on Delivery' ? 'Cash due' : 'PAID' + (order.paymentRef ? ' · ' + order.paymentRef : '') }}</p>
-          @if (order.riderName) {
-            <p class="row-item__meta">Rider: {{ order.riderName }}</p>
-          }
-          @if (order.status === 'Cancelled') {
-            <p class="row-item__meta">Cancelled by {{ order.cancelledBy === 'admin' ? 'the store' : 'the customer' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}</p>
-          }
+            @if (isOpen(order.id)) {
+              <div class="oc__details">
+                <ul class="lines">
+                  @for (line of order.items; track line.productId) {
+                    <li><span>{{ line.quantity }}× {{ line.name }}</span><span class="num">{{ line.price * line.quantity | peso }}</span></li>
+                  }
+                </ul>
+                <dl class="facts">
+                  <div><dt><ion-icon name="location-outline" aria-hidden="true"></ion-icon></dt>
+                    <dd>{{ order.shipping.address }}, {{ order.shipping.city }}</dd></div>
+                  <div><dt><ion-icon name="call-outline" aria-hidden="true"></ion-icon></dt>
+                    <dd>{{ order.shipping.phone }}</dd></div>
+                  <div><dt><ion-icon name="card-outline" aria-hidden="true"></ion-icon></dt>
+                    <dd>{{ order.payment }} · {{ order.payment === 'Cash on Delivery' ? 'Cash due' : 'PAID' + (order.paymentRef ? ' · ' + order.paymentRef : '') }}</dd></div>
+                  @if (order.riderName) {
+                    <div><dt><ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon></dt>
+                      <dd>Rider: {{ order.riderName }}</dd></div>
+                  }
+                </dl>
+              </div>
+            }
 
-          <div class="order-foot">
-            <span class="order-total num">{{ order.total | peso }}</span>
-            <div class="order-actions">
-              @switch (order.status) {
-                @case ('Placed') {
-                  <ion-button size="small" (click)="startPreparing(order.id)">Start preparing</ion-button>
+            <footer class="oc__foot">
+              <button type="button" class="oc__more" (click)="toggle(order.id)" [attr.aria-expanded]="isOpen(order.id)">
+                {{ isOpen(order.id) ? 'Hide details' : 'View details' }}
+                <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+              </button>
+              <div class="oc__actions">
+                @if (canCancel(order)) {
+                  <ion-button size="small" fill="outline" color="danger" (click)="cancel(order)">Cancel</ion-button>
                 }
-                @case ('Preparing') {
-                  <span class="row-item__meta">Waiting for a rider</span>
+                @if (order.status === 'Placed') {
+                  <ion-button size="small" (click)="startPreparing(order.id)">
+                    <ion-icon slot="start" name="flame-outline" aria-hidden="true"></ion-icon>
+                    Start preparing
+                  </ion-button>
+                } @else if (order.status === 'Preparing') {
+                  <span class="oc__state">Waiting for a rider</span>
+                } @else if (order.status === 'Out for Delivery') {
+                  <span class="oc__state">With {{ order.riderName || 'a rider' }}</span>
                 }
-                @case ('Out for Delivery') {
-                  <span class="row-item__meta">With {{ order.riderName || 'a rider' }}</span>
-                }
-                @case ('Delivered') {
-                  <span class="row-item__meta">Delivered{{ order.riderName ? ' by ' + order.riderName : '' }}</span>
-                }
-              }
-              @if (canCancel(order)) {
-                <ion-button size="small" fill="outline" color="danger" (click)="cancel(order)">Cancel</ion-button>
-              }
-            </div>
-          </div>
-        </article>
-      }
+              </div>
+            </footer>
+          </article>
+        }
+      </div>
     }
   </div>
 </ion-content>

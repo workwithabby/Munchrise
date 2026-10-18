@@ -87,12 +87,16 @@
               </div>
             </ion-label>
             <span slot="end" class="row-actions">
-              <ion-icon name="create-outline" class="row-edit" aria-hidden="true"></ion-icon>
-              <ion-button class="row-delete" fill="clear" color="danger"
+              <button type="button" class="act act--edit"
+                (click)="$event.stopPropagation(); startEdit(product)"
+                [attr.aria-label]="'Edit ' + product.name">
+                <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+              </button>
+              <button type="button" class="act act--delete"
                 (click)="$event.stopPropagation(); askDelete(product)"
                 [attr.aria-label]="'Delete ' + product.name">
-                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-              </ion-button>
+                <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+              </button>
             </span>
           </ion-item>
         }
@@ -123,87 +127,103 @@
 
     <ion-content>
       <form class="page stack product-form" (submit)="$event.preventDefault(); saveForm()">
-        <ion-input
-          class="field"
-          fill="outline"
-          label="Name"
-          labelPlacement="floating"
-          [value]="fName()"
-          (ionInput)="fName.set($event.detail.value ?? '')">
-        </ion-input>
 
-        <ion-input
-          class="field"
-          fill="outline"
-          label="Short description"
-          labelPlacement="floating"
-          [value]="fDescription()"
-          (ionInput)="fDescription.set($event.detail.value ?? '')">
-        </ion-input>
-
-        <ion-select
-          class="field"
-          fill="outline"
-          label="Category"
-          labelPlacement="floating"
-          [value]="fCategory()"
-          [interfaceOptions]="{ header: 'Category' }"
-          (ionChange)="fCategory.set($event.detail.value ?? '')">
-          @for (category of categories; track category) {
-            <ion-select-option [value]="category">{{ category }}</ion-select-option>
-          }
-        </ion-select>
-
-        <ion-input
-          class="field"
-          fill="outline"
-          label="Price (₱)"
-          labelPlacement="floating"
-          type="number"
-          inputmode="decimal"
-          min="0"
-          step="1"
-          [value]="fPrice()"
-          (ionInput)="fPrice.set($event.detail.value ?? '')">
-        </ion-input>
-
-        <ion-input
-          class="field"
-          fill="outline"
-          label="Stock"
-          labelPlacement="floating"
-          type="number"
-          inputmode="numeric"
-          min="0"
-          step="1"
-          [value]="fStock()"
-          (ionInput)="fStock.set($event.detail.value ?? '')">
-        </ion-input>
-
-        <ion-input
-          class="field"
-          fill="outline"
-          label="Image URL (optional)"
-          labelPlacement="floating"
-          type="url"
-          [value]="fImage()"
-          (ionInput)="fImage.set($event.detail.value ?? '')">
-        </ion-input>
-
-        <div class="photo-row">
-          @if (fImage()) {
-            <img class="photo-preview" [src]="fImage()" alt="Product photo preview" />
-          }
+        <!-- Photo: big preview, tap to change -->
+        <section class="fsec fsec--photo">
           <input #photo type="file" accept="image/*" hidden (change)="onPhotoChosen($event)" />
-          <ion-button fill="outline" size="small" [disabled]="uploading()" (click)="photo.click()">
-            <ion-icon slot="start" name="image-outline" aria-hidden="true"></ion-icon>
-            {{ uploading() ? 'Uploading…' : 'Upload a photo' }}
-          </ion-button>
-        </div>
+          <button type="button" class="photo-drop" [class.has-image]="!!fImage()" [disabled]="uploading()"
+            (click)="photo.click()" aria-label="Upload a product photo">
+            @if (fImage()) {
+              <img [src]="fImage()" alt="Product photo preview" />
+            }
+            <span class="photo-drop__hint">
+              <ion-icon [name]="uploading() ? 'cloud-upload-outline' : 'camera-outline'" aria-hidden="true"></ion-icon>
+              {{ uploading() ? 'Uploading…' : fImage() ? 'Change photo' : 'Add a photo' }}
+            </span>
+          </button>
+          @if (fImage()) {
+            <button type="button" class="link-btn" (click)="fImage.set('')">
+              <ion-icon name="trash-outline" aria-hidden="true"></ion-icon> Remove photo
+            </button>
+          }
+          <ion-input class="field" fill="outline" label="Or paste an image URL" labelPlacement="floating" type="url"
+            [value]="fImage().startsWith('data:') ? '' : fImage()" (ionInput)="fImage.set($event.detail.value ?? '')">
+          </ion-input>
+        </section>
 
-        <ion-toggle justify="start" [checked]="fBestSeller()" (ionChange)="fBestSeller.set(!!$event.detail.checked)">
-          Best seller
-        </ion-toggle>
+        <!-- Basics -->
+        <section class="fsec">
+          <h3 class="fsec__title"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon> Basics</h3>
+          <ion-input class="field" fill="outline" label="Name" labelPlacement="floating" maxlength="60"
+            [value]="fName()" (ionInput)="fName.set($event.detail.value ?? '')">
+          </ion-input>
+          <ion-input class="field" fill="outline" label="Short description" labelPlacement="floating" maxlength="120"
+            [counter]="true" [value]="fDescription()" (ionInput)="fDescription.set($event.detail.value ?? '')">
+          </ion-input>
+
+          <p class="fsec__label">Category</p>
+          <div class="chip-pick" role="radiogroup" aria-label="Category">
+            @for (category of categories; track category) {
+              <button type="button" class="filter-chip" role="radio" [class.is-active]="fCategory() === category"
+                [attr.aria-checked]="fCategory() === category" (click)="fCategory.set(category)">
+                {{ category }}
+              </button>
+            }
+          </div>
+
+          <button type="button" class="best-toggle" [class.is-on]="fBestSeller()"
+            [attr.aria-pressed]="fBestSeller()" (click)="fBestSeller.set(!fBestSeller())">
+            <ion-icon [name]="fBestSeller() ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>
+            <span>
+              <strong>Best seller</strong>
+              <small>Shows a badge on the menu</small>
+            </span>
+            <span class="best-toggle__switch" aria-hidden="true"></span>
+          </button>
+        </section>
+
+        <!-- Price & stock -->
+        <section class="fsec">
+          <h3 class="fsec__title"><ion-icon name="pricetag-outline" aria-hidden="true"></ion-icon> Price &amp; stock</h3>
+          <ion-input class="field" fill="outline" label="Price (₱)" labelPlacement="floating" type="number"
+            inputmode="decimal" min="0" step="1" [value]="fPrice()" (ionInput)="fPrice.set($event.detail.value ?? '')">
+          </ion-input>
+
+          <p class="fsec__label">Stock</p>
+          <div class="qty">
+            <button type="button" class="qty__btn" (click)="bumpStock(-1)" [disabled]="(+fStock() || 0) <= 0" aria-label="One less">
+              <ion-icon name="remove" aria-hidden="true"></ion-icon>
+            </button>
+            <ion-input class="qty__input" type="number" inputmode="numeric" min="0" step="1" aria-label="Stock"
+              [value]="fStock()" (ionInput)="fStock.set($event.detail.value ?? '')"></ion-input>
+            <button type="button" class="qty__btn" (click)="bumpStock(1)" aria-label="One more">
+              <ion-icon name="add" aria-hidden="true"></ion-icon>
+            </button>
+            <button type="button" class="qty__quick" (click)="bumpStock(10)">+10</button>
+          </div>
+          @if (+fStock() === 0) {
+            <span class="pill pill--danger">Out of stock</span>
+          } @else if (+fStock() <= 5) {
+            <span class="pill pill--warning">Low stock</span>
+          } @else {
+            <span class="pill pill--success">In stock</span>
+          }
+        </section>
+
+        <!-- Nutrition -->
+        <section class="fsec">
+          <h3 class="fsec__title"><ion-icon name="nutrition-outline" aria-hidden="true"></ion-icon> Nutrition facts</h3>
+          <div class="nutri-grid">
+            <ion-input class="field" fill="outline" label="Calories (kcal)" labelPlacement="floating" type="number"
+              inputmode="numeric" min="0" step="1" [value]="fCalories()" (ionInput)="fCalories.set($event.detail.value ?? '')"></ion-input>
+            <ion-input class="field" fill="outline" label="Protein (g)" labelPlacement="floating" type="number"
+              inputmode="decimal" min="0" [value]="fProtein()" (ionInput)="fProtein.set($event.detail.value ?? '')"></ion-input>
+            <ion-input class="field" fill="outline" label="Carbs (g)" labelPlacement="floating" type="number"
+              inputmode="decimal" min="0" [value]="fCarbs()" (ionInput)="fCarbs.set($event.detail.value ?? '')"></ion-input>
+            <ion-input class="field" fill="outline" label="Fat (g)" labelPlacement="floating" type="number"
+              inputmode="decimal" min="0" [value]="fFat()" (ionInput)="fFat.set($event.detail.value ?? '')"></ion-input>
+          </div>
+        </section>
 
         @if (formError()) {
           <p class="form-error" role="alert">
@@ -216,9 +236,13 @@
 
     <ion-footer>
       <ion-toolbar class="form-actions">
-        <ion-button expand="block" (click)="saveForm()">
-          {{ editingId() === null ? 'Add product' : 'Save changes' }}
-        </ion-button>
+        <div class="form-actions__row">
+          <ion-button fill="outline" (click)="cancelForm()">Cancel</ion-button>
+          <ion-button class="grow" (click)="saveForm()">
+            <ion-icon slot="start" name="checkmark" aria-hidden="true"></ion-icon>
+            {{ editingId() === null ? 'Add product' : 'Save changes' }}
+          </ion-button>
+        </div>
       </ion-toolbar>
     </ion-footer>
   </ng-template>

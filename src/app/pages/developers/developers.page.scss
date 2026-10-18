@@ -57,6 +57,48 @@
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-md);
   text-align: center;
+  position: relative;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: card-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.member-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.member-card:active {
+  transform: scale(0.96);
+}
+
+.member-card:hover .avatar img {
+  transform: scale(1.08);
+}
+
+.tap-hint {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  color: var(--color-muted-text);
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* The group leader gets the full-width spot at the top */
@@ -71,8 +113,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  width: 84px;
+  height: 84px;
+  overflow: hidden;
   border-radius: 50%;
   border: 3px solid var(--munch-white);
   box-shadow: var(--shadow-md);
@@ -81,10 +124,17 @@
   font-size: 22px;
 }
 
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
 .leader .avatar {
-  width: 80px;
-  height: 80px;
-  font-size: 28px;
+  width: 112px;
+  height: 112px;
+  box-shadow: 0 0 0 4px var(--munch-mustard), var(--shadow-md);
 }
 
 .member-name {
@@ -166,4 +216,84 @@
   margin: 0;
   text-align: center;
   font-size: var(--text-sm);
+}
+
+/* --- Photo viewer --- */
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(40, 20, 8, 0.7);
+  backdrop-filter: blur(6px);
+  animation: fade-in 0.2s ease both;
+}
+
+.viewer__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: min(100%, 340px);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+
+.viewer__photo {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--munch-mustard);
+  box-shadow: var(--shadow-md);
+}
+
+.viewer__card h2 {
+  margin: var(--space-2) 0 0;
+}
+
+.viewer__sub {
+  margin: 0;
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+
+.viewer__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--color-muted-text);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.8) translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .member-card, .viewer, .viewer__card { animation: none; }
 }

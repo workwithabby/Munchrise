@@ -31,11 +31,28 @@ export class RiderPage {
   protected readonly auth = inject(AuthService);
   protected readonly rider = inject(RiderService);
 
-  readonly tabs: { id: RiderTab; label: string }[] = [
-    { id: 'pickup', label: 'To pick up' },
-    { id: 'ontheway', label: 'On the way' },
-    { id: 'done', label: 'Delivered' },
+  readonly tabs: { id: RiderTab; label: string; icon: string }[] = [
+    { id: 'pickup', label: 'To pick up', icon: 'bag-check-outline' },
+    { id: 'ontheway', label: 'On the way', icon: 'bicycle-outline' },
+    { id: 'done', label: 'Delivered', icon: 'checkmark-circle-outline' },
   ];
+
+  /** Orders whose item list is open. */
+  private readonly open = signal<ReadonlySet<string>>(new Set());
+
+  isOpen(id: string): boolean {
+    return this.open().has(id);
+  }
+
+  toggle(id: string): void {
+    const next = new Set(this.open());
+    if (!next.delete(id)) next.add(id);
+    this.open.set(next);
+  }
+
+  itemCount(order: Order): number {
+    return order.items.reduce((sum, line) => sum + line.quantity, 0);
+  }
   readonly tab = signal<RiderTab>('pickup');
 
   /** "Good morning" / "Good afternoon" / "Good evening" for the banner. */

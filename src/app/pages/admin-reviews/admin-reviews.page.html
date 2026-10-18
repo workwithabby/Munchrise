@@ -24,55 +24,93 @@
       </div>
 
       @if (inCategory().length > 0) {
-        <section class="card rating-summary">
-          <div class="rating-summary__score">
-            <span class="rating-summary__value num">{{ average().toFixed(1) }}</span>
-            <span class="muted">{{ inCategory().length }} {{ inCategory().length === 1 ? 'review' : 'reviews' }}</span>
+        <!-- Rating summary: tap a bar to filter by that rating -->
+        <section class="summary">
+          <div class="summary__score">
+            <span class="summary__value num">{{ average().toFixed(1) }}</span>
+            <span class="stars" role="img" [attr.aria-label]="average().toFixed(1) + ' out of 5 stars'">
+              @for (star of stars; track star) {
+                <ion-icon [name]="star <= roundedAverage() ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>
+              }
+            </span>
+            <span class="summary__count">{{ inCategory().length }} {{ inCategory().length === 1 ? 'review' : 'reviews' }}</span>
           </div>
-          <ul class="rating-summary__bars" aria-label="Rating breakdown">
+          <ul class="dist" aria-label="Rating breakdown">
             @for (row of distribution(); track row.star) {
               <li>
-                <span class="num">{{ row.star }}★</span>
-                <span class="bar" aria-hidden="true"><span class="bar__fill" [style.width.%]="(row.count / maxCount()) * 100"></span></span>
-                <span class="num muted">{{ row.count }}</span>
+                <button type="button" class="dist__row" [class.is-active]="ratingFilter() === row.star"
+                  [attr.aria-pressed]="ratingFilter() === row.star"
+                  (click)="ratingFilter.set(ratingFilter() === row.star ? 0 : row.star)">
+                  <span class="num dist__star">{{ row.star }}<ion-icon name="star" aria-hidden="true"></ion-icon></span>
+                  <span class="dist__bar" aria-hidden="true"><span class="dist__fill" [style.width.%]="(row.count / maxCount()) * 100"></span></span>
+                  <span class="num dist__n">{{ row.count }}</span>
+                </button>
               </li>
             }
           </ul>
         </section>
 
-        <div class="chip-row chip-row--wrap" role="group" aria-label="Rating">
-          @for (rating of ratingTabs; track rating) {
-            <button type="button" class="filter-chip filter-chip--sm" [class.is-active]="ratingFilter() === rating"
-              [attr.aria-pressed]="ratingFilter() === rating" (click)="ratingFilter.set(rating)">
-              {{ rating === 0 ? 'All ratings' : rating + '★' }}
-              <span class="chip-count">{{ ratingCount(rating) }}</span>
-            </button>
-          }
+        <ion-searchbar class="search" placeholder="Search reviews, customers or products" [debounce]="200"
+          [value]="search()" (ionInput)="search.set($event.detail.value ?? '')"></ion-searchbar>
+
+        <div class="toolbar">
+          <div class="chip-row chip-row--wrap" role="group" aria-label="Rating">
+            @for (rating of ratingTabs; track rating) {
+              <button type="button" class="filter-chip filter-chip--sm" [class.is-active]="ratingFilter() === rating"
+                [attr.aria-pressed]="ratingFilter() === rating" (click)="ratingFilter.set(rating)">
+                {{ rating === 0 ? 'All ratings' : rating + '★' }}
+                <span class="chip-count">{{ ratingCount(rating) }}</span>
+              </button>
+            }
+          </div>
+          <div class="sort" role="group" aria-label="Sort">
+            @for (opt of sortOptions; track opt.id) {
+              <button type="button" class="sort__btn" [class.is-active]="sort() === opt.id"
+                [attr.aria-pressed]="sort() === opt.id" (click)="sort.set(opt.id)">{{ opt.label }}</button>
+            }
+          </div>
         </div>
       }
 
+      <p class="result-count">{{ reviews().length }} {{ reviews().length === 1 ? 'review' : 'reviews' }}</p>
+
       @if (reviews().length === 0) {
         <app-empty-state icon="chatbubble-ellipses-outline" title="No reviews here"
-          text="Try another category or rating." />
+          [text]="search() ? 'Nothing matches “' + search() + '”.' : 'Try another category or rating.'" />
       } @else {
-        @for (review of reviews(); track review.id) {
-          <article class="card review-card">
-            <div class="review-card__top">
-              <div>
-                <p class="review-card__product">{{ review.productName }}</p>
-                <p class="row-item__meta">{{ review.category }} · {{ review.author }} · {{ review.createdAt | date: 'MMM d, y' }}</p>
-              </div>
-              <span class="review-stars" role="img" [attr.aria-label]="review.rating + ' out of 5 stars'">
-                @for (star of stars; track star) {
-                  <ion-icon [name]="star <= review.rating ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>
+        <div class="review-grid">
+          @for (review of reviews(); track review.id; let i = $index) {
+            <article class="rv" [class.rv--low]="review.rating <= 2" [class.rv--high]="review.rating >= 4"
+              [style.--i]="i < 8 ? i : 8">
+              <header class="rv__top">
+                <span class="rv__avatar" aria-hidden="true">{{ initial(review.author) }}</span>
+                <div class="rv__who">
+                  <strong>{{ review.author }}</strong>
+                  <small>{{ review.createdAt | date: 'MMM d, y' }}</small>
+                </div>
+                <span class="stars" role="img" [attr.aria-label]="review.rating + ' out of 5 stars'">
+                  @for (star of stars; track star) {
+                    <ion-icon [name]="star <= review.rating ? 'star' : 'star-outline'" aria-hidden="true"></ion-icon>
+                  }
+                </span>
+              </header>
+
+              @if (review.comment) {
+                <p class="rv__comment">“{{ review.comment }}”</p>
+              } @else {
+                <p class="rv__comment rv__comment--none">No comment, just a rating.</p>
+              }
+
+              <footer class="rv__foot">
+                <span class="rv__product"><ion-icon name="restaurant-outline" aria-hidden="true"></ion-icon> {{ review.productName }}</span>
+                <span class="rv__cat">{{ review.category }}</span>
+                @if (review.rating <= 2) {
+                  <span class="pill pill--danger">Needs attention</span>
                 }
-              </span>
-            </div>
-            @if (review.comment) {
-              <p class="review-card__comment">{{ review.comment }}</p>
-            }
-          </article>
-        }
+              </footer>
+            </article>
+          }
+        </div>
       }
     }
   </div>

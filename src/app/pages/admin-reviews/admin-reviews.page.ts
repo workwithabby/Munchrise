@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { computed, Component, inject, signal } from '@angular/core';
-import { IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonTitle, IonToolbar, IonFooter } from '@ionic/angular';
+import { IonButtons, IonContent, IonHeader, IonFooter, IonIcon, IonMenuButton, IonSearchbar, IonTitle, IonToolbar } from '@ionic/angular';
 import { RoleTabBarComponent } from '../../components/role-tab-bar/role-tab-bar.component';
 
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -13,7 +13,7 @@ import { ReviewService } from '../../services/review.service';
   templateUrl: './admin-reviews.page.html',
   styleUrls: ['./admin-reviews.page.scss'],
   standalone: true,
-  imports: [RoleTabBarComponent, IonFooter, DatePipe, EmptyStateComponent, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonTitle, IonToolbar],
+  imports: [RoleTabBarComponent, IonFooter, DatePipe, EmptyStateComponent, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonSearchbar, IonTitle, IonToolbar],
 })
 export class AdminReviewsPage {
   private readonly reviewService = inject(ReviewService);
@@ -24,6 +24,13 @@ export class AdminReviewsPage {
   readonly categoryFilter = signal('All');
   /** 0 = every rating. */
   readonly ratingFilter = signal(0);
+  readonly search = signal('');
+  readonly sort = signal<'newest' | 'highest' | 'lowest'>('newest');
+  readonly sortOptions: { id: 'newest' | 'highest' | 'lowest'; label: string }[] = [
+    { id: 'newest', label: 'Newest' },
+    { id: 'highest', label: 'Highest' },
+    { id: 'lowest', label: 'Lowest' },
+  ];
   readonly categoryTabs: string[] = ['All', ...this.productService.getCategories()];
   readonly ratingTabs = [0, 5, 4, 3, 2, 1];
 
@@ -51,8 +58,23 @@ export class AdminReviewsPage {
   /** What the list shows: category + rating. */
   readonly reviews = computed(() => {
     const rating = this.ratingFilter();
-    return this.inCategory().filter((r) => rating === 0 || r.rating === rating);
+    const q = this.search().trim().toLowerCase();
+    const sort = this.sort();
+    return this.inCategory()
+      .filter((r) => rating === 0 || r.rating === rating)
+      .filter((r) => !q || [r.comment, r.author, r.productName].some((t) => t.toLowerCase().includes(q)))
+      .sort((a, b) =>
+        sort === 'highest' ? b.rating - a.rating || b.createdAt.localeCompare(a.createdAt)
+        : sort === 'lowest' ? a.rating - b.rating || b.createdAt.localeCompare(a.createdAt)
+        : b.createdAt.localeCompare(a.createdAt),
+      );
   });
+
+  readonly roundedAverage = computed(() => Math.round(this.average()));
+
+  initial(name: string): string {
+    return (name.trim()[0] ?? '?').toUpperCase();
+  }
 
   readonly average = computed(() => {
     const list = this.inCategory();

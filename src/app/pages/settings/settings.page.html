@@ -22,6 +22,28 @@
       </ul>
     </section>
 
+    @if (auth.isLoggedIn()) {
+      <section class="card form-stack">
+        <h2 class="section-title">Profile</h2>
+        <div class="photo-row">
+          @if (avatarUrl() && !photoFailed()) {
+            <img class="photo" [src]="avatarUrl()" alt="Profile photo" (error)="photoFailed.set(true)" />
+          } @else {
+            <div class="photo photo--fallback" aria-hidden="true">{{ initials() }}</div>
+          }
+          <label class="soft-button photo-button">
+            <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
+            Change photo
+            <input type="file" accept="image/*" hidden (change)="pickPhoto($event)" />
+          </label>
+        </div>
+        <ion-input class="field" fill="outline" type="text" label="Name" labelPlacement="floating"
+          autocomplete="name" [value]="name()" (ionInput)="name.set($event.detail.value ?? '')">
+        </ion-input>
+        <ion-button expand="block" (click)="saveName()">Save name</ion-button>
+      </section>
+    }
+
     @if (links().length > 0) {
       <section class="card">
         <h2 class="section-title">Shortcuts</h2>

@@ -20,18 +20,26 @@
 
     <div class="team-grid">
       @for (member of members; track member.name) {
-        <article class="member-card" [class.leader]="member.role === 'Group Leader'">
-          <span class="avatar" [style.background]="avatarGradient($index)" aria-hidden="true">{{ initials(member.name) }}</span>
-          <p class="member-name">{{ displayName(member.name) }}</p>
+        <button
+          type="button"
+          class="member-card"
+          [class.leader]="member.role === 'Group Leader'"
+          [style.--i]="$index"
+          (click)="open(member)"
+          [attr.aria-label]="'View ' + displayName(member.name) + ' profile'"
+        >
+          <span class="avatar" [style.background]="avatarGradient($index)">
+            <img [src]="member.photo" [alt]="displayName(member.name)" loading="lazy" />
+          </span>
+          <span class="member-name">{{ displayName(member.name) }}</span>
           <span class="role" [class.role--leader]="member.role === 'Group Leader'">
             @if (member.role === 'Group Leader') {
               <ion-icon name="ribbon" aria-hidden="true"></ion-icon>
             }
             {{ member.role }}
           </span>
-          <!-- keeps the original "Surname, Given" name available to screen readers and search -->
-          <span class="sr-only">{{ member.name }}</span>
-        </article>
+          <span class="tap-hint" aria-hidden="true"><ion-icon name="expand-outline"></ion-icon></span>
+        </button>
       }
     </div>
 
@@ -49,4 +57,23 @@
 
     <p class="muted thanks">Thank you for trying Munchrise — "Rise, Munch, Repeat!"</p>
   </div>
+
+  @if (selected(); as m) {
+    <div class="viewer" (click)="close()" role="dialog" aria-modal="true" [attr.aria-label]="displayName(m.name)">
+      <div class="viewer__card" (click)="$event.stopPropagation()">
+        <button type="button" class="viewer__close" (click)="close()" aria-label="Close">
+          <ion-icon name="close"></ion-icon>
+        </button>
+        <img class="viewer__photo" [src]="m.photo" [alt]="displayName(m.name)" />
+        <h2>{{ displayName(m.name) }}</h2>
+        <span class="role" [class.role--leader]="m.role === 'Group Leader'">
+          @if (m.role === 'Group Leader') {
+            <ion-icon name="ribbon" aria-hidden="true"></ion-icon>
+          }
+          {{ m.role }}
+        </span>
+        <p class="viewer__sub">Team Munchrise · IT31S6</p>
+      </div>
+    </div>
+  }
 </ion-content>

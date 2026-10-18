@@ -16,10 +16,7 @@ import {
   IonMenuButton,
   IonModal,
   IonSearchbar,
-  IonSelect,
-  IonSelectOption,
   IonTitle,
-  IonToggle,
   IonToolbar,
   ToastController,
 } from '@ionic/angular';
@@ -59,10 +56,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
     IonMenuButton,
     IonModal,
     IonSearchbar,
-        IonSelect,
-    IonSelectOption,
     IonTitle,
-    IonToggle,
     IonToolbar,
     PesoPipe,
     ProductImageComponent,
@@ -95,6 +89,10 @@ export class AdminPage {
   readonly fStock = signal('');
   readonly fImage = signal('');
   readonly fBestSeller = signal(false);
+  readonly fCalories = signal('0');
+  readonly fProtein = signal('0');
+  readonly fCarbs = signal('0');
+  readonly fFat = signal('0');
 
   /** Picks a photo from the phone, shrinks it and uses it as the product image. */
   async onPhotoChosen(event: Event): Promise<void> {
@@ -189,6 +187,13 @@ export class AdminPage {
     this.productsService.adjustStock(product.id, delta);
   }
 
+  /** Stock +/- inside the form. */
+  bumpStock(delta: number): void {
+    const current = Number(this.fStock());
+    const base = Number.isFinite(current) ? current : 0;
+    this.fStock.set(String(Math.max(0, Math.round(base) + delta)));
+  }
+
   /** Opens an empty form for a new product. */
   startAdd(): void {
     this.editingId.set(null);
@@ -199,6 +204,10 @@ export class AdminPage {
     this.fStock.set('0');
     this.fImage.set('');
     this.fBestSeller.set(false);
+    this.fCalories.set('0');
+    this.fProtein.set('0');
+    this.fCarbs.set('0');
+    this.fFat.set('0');
     this.formError.set('');
     this.formOpen.set(true);
   }
@@ -213,6 +222,10 @@ export class AdminPage {
     this.fStock.set(String(product.stock));
     this.fImage.set(product.image);
     this.fBestSeller.set(product.isBestSeller);
+    this.fCalories.set(String(product.nutrition.calories));
+    this.fProtein.set(String(product.nutrition.protein));
+    this.fCarbs.set(String(product.nutrition.carbs));
+    this.fFat.set(String(product.nutrition.fat));
     this.formError.set('');
     this.formOpen.set(true);
   }
@@ -254,7 +267,17 @@ export class AdminPage {
       return;
     }
 
+    const nutrientValues = [this.fCalories(), this.fProtein(), this.fCarbs(), this.fFat()].map((v) =>
+      v.trim() === '' ? 0 : Number(v),
+    );
+    if (nutrientValues.some((n) => !Number.isFinite(n) || n < 0)) {
+      await this.fail('Nutrition values must be 0 or more.');
+      return;
+    }
+    const [calories, protein, carbs, fat] = nutrientValues;
+
     const input: ProductInput = {
+      nutrition: { calories: Math.round(calories), protein, carbs, fat },
       name,
       description,
       category: this.fCategory(),

@@ -9,7 +9,8 @@
 
 <ion-content>
   <div class="page page--wide stack">
-    <section class="card card--hero rider-hello">
+    <!-- Hello + availability -->
+    <section class="card card--hero rider-hello" [class.is-offline]="!rider.online()">
       <div class="rider-hello__top">
         <div class="rider-hello__text">
           <p class="rider-hello__greeting">{{ greeting }},</p>
@@ -25,14 +26,17 @@
 
       <div class="rider-stats">
         <div class="rider-stat">
+          <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
           <strong>{{ rider.today().deliveries }}</strong>
           <span>Delivered today</span>
         </div>
         <div class="rider-stat">
+          <ion-icon name="wallet-outline" aria-hidden="true"></ion-icon>
           <strong>{{ rider.today().earnings | peso }}</strong>
           <span>Earned today</span>
         </div>
         <div class="rider-stat">
+          <ion-icon name="bag-check-outline" aria-hidden="true"></ion-icon>
           <strong>{{ countFor('pickup') }}</strong>
           <span>To pick up</span>
         </div>
@@ -43,12 +47,14 @@
       <p class="callout"><ion-icon name="moon-outline" aria-hidden="true"></ion-icon> You are offline. Switch on to take new orders.</p>
     }
 
-    <div class="chip-row" role="group" aria-label="Delivery status">
+    <!-- Status tabs -->
+    <div class="tabs" role="group" aria-label="Delivery status">
       @for (t of tabs; track t.id) {
-        <button type="button" class="filter-chip" [class.is-active]="tab() === t.id"
+        <button type="button" class="tab" [class.is-active]="tab() === t.id"
           [attr.aria-pressed]="tab() === t.id" (click)="tab.set(t.id)">
-          {{ t.label }}
-          <span class="chip-count">{{ countFor(t.id) }}</span>
+          <ion-icon [name]="t.icon" aria-hidden="true"></ion-icon>
+          <span class="tab__label">{{ t.label }}</span>
+          <span class="tab__count num">{{ countFor(t.id) }}</span>
         </button>
       }
     </div>
@@ -58,60 +64,89 @@
         [title]="tab() === 'pickup' ? 'Nothing to pick up' : tab() === 'ontheway' ? 'No active deliveries' : 'No deliveries yet'"
         [text]="tab() === 'pickup' ? 'Orders show here once the kitchen is preparing them.' : tab() === 'ontheway' ? 'Pick up an order to start a delivery.' : 'Finished deliveries appear here.'" />
     } @else {
-      @for (order of orders(); track order.id) {
-        <article class="card order-card">
-          <div class="order-head">
-            <div>
-              <p class="order-id">{{ order.id }}</p>
-              <p class="row-item__meta">{{ order.placedAt | date: 'MMM d, h:mm a' }}</p>
-            </div>
-            <span class="pill pill--teal">{{ order.status }}</span>
-          </div>
+      <div class="order-grid">
+        @for (order of orders(); track order.id; let i = $index) {
+          <article class="rc" [attr.data-status]="order.status" [style.--i]="i < 8 ? i : 8">
+            <header class="rc__top">
+              <div>
+                <p class="rc__id num">{{ order.id }}</p>
+                <p class="rc__time">{{ order.placedAt | date: 'MMM d · h:mm a' }}</p>
+              </div>
+              <span class="pill pill--teal">{{ order.status }}</span>
+            </header>
 
-          <div class="drop">
-            <strong>{{ order.shipping.fullName }}</strong>
-            <span>{{ order.shipping.address }}, {{ order.shipping.city }}</span>
-            @if (order.shipping.notes) {
-              <span class="row-item__meta">Note: {{ order.shipping.notes }}</span>
-            }
+            <!-- Route: kitchen -> customer -->
+            <div class="route">
+              <div class="route__stop">
+                <span class="route__dot route__dot--from" aria-hidden="true"></span>
+                <div><small>Pick up</small><strong>Munchrise kitchen</strong></div>
+              </div>
+              <div class="route__stop">
+                <span class="route__dot route__dot--to" aria-hidden="true"></span>
+                <div>
+                  <small>Drop off</small>
+                  <strong>{{ order.shipping.fullName }}</strong>
+                  <span>{{ order.shipping.address }}, {{ order.shipping.city }}</span>
+                  @if (order.shipping.notes) {
+                    <span class="rc__note"><ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon> {{ order.shipping.notes }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+
             @if (order.status !== 'Delivered') {
-              <div class="drop__actions">
-                <a class="drop__btn" [href]="'tel:' + order.shipping.phone"><ion-icon name="call-outline" aria-hidden="true"></ion-icon> Call</a>
-                <a class="drop__btn" [href]="mapsUrl(order)" target="_blank" rel="noopener"><ion-icon name="navigate-outline" aria-hidden="true"></ion-icon> Navigate</a>
+              <div class="rc__contact">
+                <a class="contact-btn" [href]="'tel:' + order.shipping.phone">
+                  <ion-icon name="call-outline" aria-hidden="true"></ion-icon> Call
+                </a>
+                <a class="contact-btn" [href]="mapsUrl(order)" target="_blank" rel="noopener">
+                  <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon> Navigate
+                </a>
               </div>
             }
-          </div>
 
-          <ul class="order-lines">
-            @for (line of order.items; track line.productId) {
-              <li><span>{{ line.quantity }}× {{ line.name }}</span></li>
+            <!-- Items (tap to open) -->
+            <button type="button" class="rc__items" (click)="toggle(order.id)" [attr.aria-expanded]="isOpen(order.id)">
+              <ion-icon name="restaurant-outline" aria-hidden="true"></ion-icon>
+              <span>{{ itemCount(order) }} {{ itemCount(order) === 1 ? 'item' : 'items' }}</span>
+              <ion-icon class="chev" [class.is-open]="isOpen(order.id)" name="chevron-down" aria-hidden="true"></ion-icon>
+            </button>
+            @if (isOpen(order.id)) {
+              <ul class="order-lines">
+                @for (line of order.items; track line.productId) {
+                  <li><span>{{ line.quantity }}× {{ line.name }}</span></li>
+                }
+              </ul>
             }
-          </ul>
 
-          @if (order.payment === 'Cash on Delivery' && order.status !== 'Delivered') {
-            <p class="collect">Collect {{ order.total | peso }} in cash</p>
-          } @else {
-            <p class="row-item__meta">Paid via {{ order.payment }} · Earn {{ order.deliveryFee | peso }}</p>
-          }
+            @if (order.payment === 'Cash on Delivery' && order.status !== 'Delivered') {
+              <p class="collect"><ion-icon name="cash-outline" aria-hidden="true"></ion-icon> Collect {{ order.total | peso }} in cash</p>
+            } @else {
+              <p class="paid"><ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon> Paid via {{ order.payment }} · You earn {{ order.deliveryFee | peso }}</p>
+            }
 
-          @if (order.status !== 'Delivered') {
-            <div class="order-foot">
-              <span class="order-total num">{{ order.total | peso }}</span>
-              @if (order.status === 'Preparing') {
-                <ion-button [disabled]="!rider.online()" (click)="pickUp(order)">
-                  <ion-icon slot="start" name="bag-check-outline" aria-hidden="true"></ion-icon>
-                  Pick up
-                </ion-button>
-              } @else {
-                <ion-button color="success" (click)="deliver(order)">
-                  <ion-icon slot="start" name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
-                  Mark delivered
-                </ion-button>
-              }
-            </div>
-          }
-        </article>
-      }
+            @if (order.status !== 'Delivered') {
+              <footer class="rc__foot">
+                <div class="rc__earn">
+                  <small>You earn</small>
+                  <strong class="num">{{ order.deliveryFee | peso }}</strong>
+                </div>
+                @if (order.status === 'Preparing') {
+                  <ion-button [disabled]="!rider.online()" (click)="pickUp(order)">
+                    <ion-icon slot="start" name="bag-check-outline" aria-hidden="true"></ion-icon>
+                    Pick up
+                  </ion-button>
+                } @else {
+                  <ion-button color="success" (click)="deliver(order)">
+                    <ion-icon slot="start" name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+                    Mark delivered
+                  </ion-button>
+                }
+              </footer>
+            }
+          </article>
+        }
+      </div>
     }
   </div>
 </ion-content>

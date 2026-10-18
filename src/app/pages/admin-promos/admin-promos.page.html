@@ -9,106 +9,161 @@
 
 <ion-content>
   <div class="page page--wide stack">
-    <!-- Create -->
-    <section class="card form-stack">
-      <div class="section-head">
-        <h2 class="section-title">Create a promo code</h2>
-        <span class="count">{{ activeCount() }} live</span>
-      </div>
+    <!-- At a glance -->
+    <div class="stats" role="group" aria-label="Filter codes">
+      <button type="button" class="stat" [class.is-active]="filter() === 'all'" [attr.aria-pressed]="filter() === 'all'" (click)="filter.set('all')">
+        <ion-icon name="layers-outline" aria-hidden="true"></ion-icon>
+        <span class="stat__value num">{{ promos().length }}</span>
+        <span class="stat__label">All codes</span>
+      </button>
+      <button type="button" class="stat stat--ok" [class.is-active]="filter() === 'live'" [attr.aria-pressed]="filter() === 'live'" (click)="filter.set('live')">
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+        <span class="stat__value num">{{ activeCount() }}</span>
+        <span class="stat__label">Live</span>
+      </button>
+      <button type="button" class="stat stat--off" [class.is-active]="filter() === 'off'" [attr.aria-pressed]="filter() === 'off'" (click)="filter.set('off')">
+        <ion-icon name="close-circle-outline" aria-hidden="true"></ion-icon>
+        <span class="stat__value num">{{ promos().length - activeCount() }}</span>
+        <span class="stat__label">Switched off</span>
+      </button>
+    </div>
 
-      <ion-input
-        class="field"
-        fill="outline"
-        label="Code"
-        labelPlacement="floating"
-        placeholder="e.g. SUNRISE20"
-        autocapitalize="characters"
-        maxlength="20"
-        helperText="Letters and numbers only. Customers type this at checkout."
-        [value]="code()"
-        (ionInput)="code.set(($event.detail.value ?? '').toUpperCase().replace(' ', ''))">
-      </ion-input>
+    <!-- Create (collapsible) -->
+    <section class="card create" [class.is-open]="formOpen()">
+      <button type="button" class="create__head" (click)="formOpen.set(!formOpen())" [attr.aria-expanded]="formOpen()">
+        <span class="create__icon"><ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon></span>
+        <span class="create__title">
+          <strong>Create a promo code</strong>
+          <small>Shows on customers' Home screen right away</small>
+        </span>
+        <ion-icon class="chev" name="chevron-down" aria-hidden="true"></ion-icon>
+      </button>
 
-      <div class="form-grid-2">
-        <ion-select
-          class="field"
-          fill="outline"
-          label="Discount type"
-          labelPlacement="floating"
-          interface="popover"
-          [value]="type()"
-          (ionChange)="type.set($event.detail.value)">
-          <ion-select-option value="percent">Percent (%)</ion-select-option>
-          <ion-select-option value="fixed">Fixed amount (₱)</ion-select-option>
-        </ion-select>
+      @if (formOpen()) {
+        <div class="form-stack create__body">
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Code"
+            labelPlacement="floating"
+            placeholder="e.g. SUNRISE20"
+            autocapitalize="characters"
+            maxlength="20"
+            helperText="Letters and numbers only. Customers type this at checkout."
+            [value]="code()"
+            (ionInput)="code.set(($event.detail.value ?? '').toUpperCase().replace(' ', ''))">
+          </ion-input>
 
-        <ion-input
-          class="field"
-          fill="outline"
-          type="number"
-          inputmode="decimal"
-          [label]="type() === 'percent' ? 'Percent off' : 'Peso off'"
-          labelPlacement="floating"
-          [value]="value()"
-          (ionInput)="value.set($event.detail.value ?? '')">
-        </ion-input>
-      </div>
+          <p class="label">Discount type</p>
+          <div class="seg" role="radiogroup" aria-label="Discount type">
+            <button type="button" role="radio" class="seg__btn" [class.is-active]="type() === 'percent'"
+              [attr.aria-checked]="type() === 'percent'" (click)="setType('percent')">Percent (%)</button>
+            <button type="button" role="radio" class="seg__btn" [class.is-active]="type() === 'fixed'"
+              [attr.aria-checked]="type() === 'fixed'" (click)="setType('fixed')">Fixed amount (₱)</button>
+          </div>
 
-      <ion-input
-        class="field"
-        fill="outline"
-        type="number"
-        inputmode="decimal"
-        label="Minimum order in ₱ (optional)"
-        labelPlacement="floating"
-        [value]="minSubtotal()"
-        (ionInput)="minSubtotal.set($event.detail.value ?? '')">
-      </ion-input>
+          <ion-input
+            class="field"
+            fill="outline"
+            type="number"
+            inputmode="decimal"
+            [label]="type() === 'percent' ? 'Percent off' : 'Peso off'"
+            labelPlacement="floating"
+            [value]="value()"
+            (ionInput)="value.set($event.detail.value ?? '')">
+          </ion-input>
+          <div class="quick" role="group" aria-label="Quick amounts">
+            @for (amount of quickValues(); track amount) {
+              <button type="button" class="quick__btn" [class.is-active]="value() === '' + amount" (click)="value.set('' + amount)">
+                {{ type() === 'percent' ? amount + '%' : '₱' + amount }}
+              </button>
+            }
+          </div>
 
-      <ion-input
-        class="field"
-        fill="outline"
-        label="Description (optional)"
-        labelPlacement="floating"
-        placeholder="Shown on the deal card"
-        [value]="description()"
-        (ionInput)="description.set($event.detail.value ?? '')">
-      </ion-input>
+          <ion-input
+            class="field"
+            fill="outline"
+            type="number"
+            inputmode="decimal"
+            label="Minimum order in ₱ (optional)"
+            labelPlacement="floating"
+            [value]="minSubtotal()"
+            (ionInput)="minSubtotal.set($event.detail.value ?? '')">
+          </ion-input>
 
-      @if (preview()) {
-        <p class="preview"><ion-icon name="eye-outline" aria-hidden="true"></ion-icon> Customers will see: <strong>{{ preview() }}</strong></p>
+          <ion-input
+            class="field"
+            fill="outline"
+            label="Description (optional)"
+            labelPlacement="floating"
+            placeholder="Shown on the deal card"
+            [value]="description()"
+            (ionInput)="description.set($event.detail.value ?? '')">
+          </ion-input>
+
+          <!-- Live ticket preview -->
+          @if (preview()) {
+            <div class="preview">
+              <p class="preview__label"><ion-icon name="eye-outline" aria-hidden="true"></ion-icon> Customers will see</p>
+              <div class="ticket ticket--preview">
+                <div class="ticket__stub">
+                  <span class="ticket__big num">{{ type() === 'percent' ? value() + '%' : '₱' + value() }}</span>
+                  <span class="ticket__off">OFF</span>
+                </div>
+                <div class="ticket__main">
+                  <span class="ticket__code">{{ code() || 'YOURCODE' }}</span>
+                  <p class="ticket__desc">{{ preview() }}</p>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (error()) {
+            <p class="form-error"><ion-icon name="alert-circle" aria-hidden="true"></ion-icon> {{ error() }}</p>
+          }
+
+          <ion-button expand="block" [disabled]="saving()" (click)="create()">
+            <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
+            Create code
+          </ion-button>
+        </div>
       }
-
-      @if (error()) {
-        <p class="form-error"><ion-icon name="alert-circle" aria-hidden="true"></ion-icon> {{ error() }}</p>
-      }
-
-      <ion-button expand="block" [disabled]="saving()" (click)="create()">
-        <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
-        Create code
-      </ion-button>
     </section>
 
     <!-- List -->
     @if (promos().length === 0) {
       <app-empty-state icon="pricetags-outline" title="No promo codes yet" text="Create one above and customers will see it on their Home screen." />
+    } @else if (shown().length === 0) {
+      <app-empty-state icon="pricetags-outline" title="Nothing here" text="No codes in this group." />
     } @else {
       <ul class="promo-list">
-        @for (promo of promos(); track promo.code) {
-          <li class="card promo" [class.is-off]="promo.active === false">
-            <div class="promo__main">
-              <span class="promo__code">{{ promo.code }}</span>
-              <p class="promo__desc">{{ promo.description }}</p>
-              <p class="row-item__meta">{{ details(promo) }}</p>
+        @for (promo of shown(); track promo.code; let i = $index) {
+          <li class="promo ticket" [class.is-off]="promo.active === false" [style.--i]="i < 8 ? i : 8">
+            <div class="ticket__stub">
+              <span class="ticket__big num">{{ promo.type === 'percent' ? promo.value + '%' : '₱' + promo.value }}</span>
+              <span class="ticket__off">OFF</span>
             </div>
-            <div class="promo__actions">
-              <ion-toggle
-                [checked]="promo.active !== false"
-                [attr.aria-label]="'Turn ' + promo.code + (promo.active !== false ? ' off' : ' on')"
-                (ionChange)="setActive(promo, !!$event.detail.checked)"></ion-toggle>
-              <ion-button fill="clear" color="danger" [attr.aria-label]="'Delete ' + promo.code" (click)="askDelete(promo)">
-                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-              </ion-button>
+            <div class="ticket__main">
+              <div class="ticket__row">
+                <span class="ticket__code">{{ promo.code }}</span>
+                <span class="pill" [class]="promo.active === false ? 'pill--danger' : 'pill--success'">{{ promo.active === false ? 'Off' : 'Live' }}</span>
+              </div>
+              <p class="ticket__desc">{{ promo.description }}</p>
+              <p class="ticket__meta">{{ details(promo) }}</p>
+              <div class="ticket__actions">
+                <label class="switch">
+                  <ion-toggle
+                    [checked]="promo.active !== false"
+                    [attr.aria-label]="'Turn ' + promo.code + (promo.active !== false ? ' off' : ' on')"
+                    (ionChange)="setActive(promo, !!$event.detail.checked)"></ion-toggle>
+                </label>
+                <button type="button" class="icon-btn" (click)="copy(promo)" [attr.aria-label]="'Copy ' + promo.code">
+                  <ion-icon name="copy-outline" aria-hidden="true"></ion-icon>
+                </button>
+                <button type="button" class="icon-btn icon-btn--danger" (click)="askDelete(promo)" [attr.aria-label]="'Delete ' + promo.code">
+                  <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+                </button>
+              </div>
             </div>
           </li>
         }

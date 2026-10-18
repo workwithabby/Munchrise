@@ -1,5 +1,12 @@
 import { addIcons } from 'ionicons';
 import {
+  alertCircleOutline,
+  cloudUploadOutline,
+  documentTextOutline,
+  gitCompareOutline,
+  hourglassOutline,
+  layersOutline,
+  trophyOutline,
   bookOutline,
   businessOutline,
   cloudDoneOutline,
@@ -206,5 +213,12 @@ export function registerIcons(): void {
     timeOutline,
     trashOutline,
     walletOutline,
+    alertCircleOutline,
+    cloudUploadOutline,
+    documentTextOutline,
+    gitCompareOutline,
+    hourglassOutline,
+    layersOutline,
+    trophyOutline,
   });
 }

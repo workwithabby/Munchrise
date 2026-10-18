@@ -1,5 +1,5 @@
 import { NotificationBellComponent } from '../../components/notification-bell/notification-bell.component';
-import { Component, inject } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   IonButtons,
   IonContent,
@@ -35,6 +35,17 @@ export class DevelopersPage {
 
   /** Icon for each class detail line, in order: course, section, school, professor. */
   readonly infoIcons = ['book-outline', 'people-outline', 'business-outline', 'school-outline'];
+
+  /** Member whose profile is open in the viewer. */
+  readonly selected = signal<TeamMember | null>(null);
+
+  open(member: TeamMember): void {
+    this.selected.set(member);
+  }
+
+  close(): void {
+    this.selected.set(null);
+  }
 
   private readonly gradients = [
     'linear-gradient(145deg, #e8843d, #c8481a)',

@@ -1,0 +1,34 @@
+
+/* Profile photo + name */
+.photo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.photo {
+  width: 88px;
+  height: 88px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--munch-white);
+  box-shadow: var(--shadow-md);
+}
+
+.photo--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--munch-orange);
+  color: var(--munch-white);
+  font-family: var(--munch-font-heading);
+  font-size: 30px;
+}
+
+.photo-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}

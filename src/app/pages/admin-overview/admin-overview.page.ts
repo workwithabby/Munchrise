@@ -1,9 +1,12 @@
+import { DatePipe } from '@angular/common';
 import { computed, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonTitle, IonToolbar, IonFooter } from '@ionic/angular';
 import { RoleTabBarComponent } from '../../components/role-tab-bar/role-tab-bar.component';
 
 import { PesoPipe } from '../../pipes/peso.pipe';
+import { AuthService } from '../../services/auth.service';
+import { Order, OrderStatus } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
 import { ReviewService } from '../../services/review.service';
@@ -14,18 +17,47 @@ import { ReviewService } from '../../services/review.service';
   templateUrl: './admin-overview.page.html',
   styleUrls: ['./admin-overview.page.scss'],
   standalone: true,
-  imports: [RoleTabBarComponent, IonFooter, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonTitle, IonToolbar, PesoPipe, RouterLink],
+  imports: [DatePipe, RoleTabBarComponent, IonFooter, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonTitle, IonToolbar, PesoPipe, RouterLink],
 })
 export class AdminOverviewPage {
   private readonly productService = inject(ProductService);
   private readonly orderService = inject(OrderService);
   private readonly reviewService = inject(ReviewService);
+  private readonly auth = inject(AuthService);
+
+  readonly today = new Date();
+
+  readonly firstName = computed(() => this.auth.displayName().trim().split(/\s+/)[0] || 'there');
+
+  readonly greeting = computed(() => {
+    const hour = this.today.getHours();
+    return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  });
 
   readonly revenue = computed(() => this.orderService.orders().filter((o) => o.status !== 'Cancelled').reduce((sum, o) => sum + o.total, 0));
   readonly orderCount = computed(() => this.orderService.orderCount());
   readonly pendingCount = computed(
     () => this.orderService.orders().filter((o) => o.status !== 'Delivered' && o.status !== 'Cancelled').length,
   );
+
+  /** Orders per status, shown as the pipeline. */
+  readonly pipeline = computed(() => {
+    const orders = this.orderService.orders();
+    const steps: { status: OrderStatus; tone: string }[] = [
+      { status: 'Placed', tone: 'warning' },
+      { status: 'Preparing', tone: 'teal' },
+      { status: 'Out for Delivery', tone: 'teal' },
+      { status: 'Delivered', tone: 'success' },
+      { status: 'Cancelled', tone: 'danger' },
+    ];
+    return steps.map((s) => ({ ...s, count: orders.filter((o) => o.status === s.status).length }));
+  });
+
+  readonly restockCount = computed(() => this.stock().low.length + this.stock().out.length);
+
+  statusClass(status: Order['status']): string {
+    return status === 'Delivered' ? 'pill--success' : status === 'Placed' ? 'pill--warning' : status === 'Cancelled' ? 'pill--danger' : 'pill--teal';
+  }
 
   readonly stock = computed(() => {
     this.productService.revision();

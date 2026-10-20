@@ -32,7 +32,7 @@
         @if (cancelled()) {
           <p class="scene__hint">
             <ion-icon name="close-circle-outline" aria-hidden="true"></ion-icon>
-            {{ o.cancelledBy === 'admin' ? 'Cancelled by the store' : 'You cancelled this order' }}{{ o.cancelReason ? ': ' + o.cancelReason : '' }}.
+            {{ o.cancelledBy === 'rider' ? 'Cancelled by your rider' : 'Cancelled by the store' }}{{ o.cancelReason ? ': ' + o.cancelReason : '' }}.
             {{ o.paymentRef ? 'Your payment will be refunded.' : '' }}
           </p>
         } @else {
@@ -53,10 +53,6 @@
           </div>
         }
       </section>
-
-      @if (canCancel()) {
-        <ion-button expand="block" fill="outline" color="danger" (click)="cancel()">Cancel order</ion-button>
-      }
 
       <!-- Timeline -->
       @if (!cancelled()) {

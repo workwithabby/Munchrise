@@ -137,6 +137,7 @@
                     Pick up
                   </ion-button>
                 } @else {
+                  <ion-button fill="outline" color="danger" (click)="cancel(order)">Cancel</ion-button>
                   <ion-button color="success" (click)="deliver(order)">
                     <ion-icon slot="start" name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
                     Mark delivered

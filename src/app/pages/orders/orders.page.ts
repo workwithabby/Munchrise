@@ -17,7 +17,6 @@ import {
 import { PesoPipe } from '../../pipes/peso.pipe';
 import { Order, OrderLine } from '../../models/order.model';
 import { ProductImageComponent } from '../../components/product-image/product-image.component';
-import { OrderCancelService } from '../../services/order-cancel.service';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
 
@@ -67,7 +66,6 @@ export class OrdersPage {
   private readonly products = inject(ProductService);
   private readonly router = inject(Router);
   private readonly toastController = inject(ToastController);
-  private readonly cancelDialog = inject(OrderCancelService);
 
   /** Newest first — stays up to date when a new order is placed. */
   readonly history = computed(() => this.orders.list());
@@ -88,15 +86,6 @@ export class OrdersPage {
 
   countFor(filter: OrderFilter): number {
     return this.history().filter((o) => matches(o, filter)).length;
-  }
-
-  /** Customers can cancel only while the order is still "Placed". */
-  canCancel(order: Order): boolean {
-    return this.cancelDialog.canCancel(order, false);
-  }
-
-  async cancel(order: Order): Promise<void> {
-    await this.cancelDialog.ask(order, false);
   }
 
   /** Picture for one order line — looked up from the product's `image` field. */

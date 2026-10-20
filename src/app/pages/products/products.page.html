@@ -19,6 +19,7 @@
         class="search"
         placeholder="Search the menu..."
         [debounce]="300"
+        [value]="search()"
         (ionInput)="onSearch($event)"
         showCancelButton="never">
       </ion-searchbar>

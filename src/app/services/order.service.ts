@@ -79,7 +79,7 @@ function fromRow(row: Record<string, unknown>): Order {
     riderId: (row['rider_id'] as string | null) ?? undefined,
     pointsEarned: (row['points_earned'] as number) ?? 0,
     cancelReason: (row['cancel_reason'] as string | null) ?? undefined,
-    cancelledBy: (row['cancelled_by'] as 'user' | 'admin' | null) ?? undefined,
+    cancelledBy: (row['cancelled_by'] as 'user' | 'admin' | 'rider' | null) ?? undefined,
     paymentRef: (row['payment_ref'] as string | null) ?? undefined,
     paidAt: (row['paid_at'] as string | null) ?? undefined,
   };
@@ -344,22 +344,21 @@ export class OrderService {
   }
 
   /**
-   * Cancel an order. A customer can do it while it is still "Placed"; the admin until it leaves
-   * the kitchen. The server puts the stock back, takes the points back and tells the customer.
+   * Cancel an order. Customers cannot. The admin can until it leaves the kitchen; the rider can
+   * while delivering it. The server takes the points back and tells the customer.
    */
   async cancelOrder(id: string, reason: string): Promise<StatusResult> {
     const order = this.get(id);
     if (!order) return { ok: false, message: 'Order not found.' };
 
-    const asAdmin = this.auth.isAdmin();
+    const by: 'admin' | 'rider' | null = this.auth.isAdmin() ? 'admin' : this.auth.isRider() ? 'rider' : null;
+    if (!by) return { ok: false, message: 'Orders can only be cancelled by the store or the rider.' };
     if (order.status === 'Cancelled') return { ok: true };
-    if (asAdmin ? !['Placed', 'Preparing'].includes(order.status) : order.status !== 'Placed') {
-      return {
-        ok: false,
-        message: asAdmin
-          ? 'Only orders that have not left the kitchen can be cancelled.'
-          : 'The kitchen already started your order, so it can no longer be cancelled.',
-      };
+    if (by === 'admin' && !['Placed', 'Preparing'].includes(order.status)) {
+      return { ok: false, message: 'Only orders that have not left the kitchen can be cancelled.' };
+    }
+    if (by === 'rider' && order.status !== 'Out for Delivery') {
+      return { ok: false, message: 'You can only cancel an order you are delivering.' };
     }
 
     if (this.backend.enabled) {
@@ -375,7 +374,7 @@ export class OrderService {
             ...o,
             status: 'Cancelled' as const,
             cancelReason: reason,
-            cancelledBy: asAdmin ? ('admin' as const) : ('user' as const),
+            cancelledBy: by,
             history: [...(o.history ?? []), { status: 'Cancelled' as const, at: new Date().toISOString() }],
           }
         : o,

@@ -81,7 +81,7 @@
             } @else {
               <p class="cancel-note">
                 <ion-icon name="close-circle" aria-hidden="true"></ion-icon>
-                Cancelled by {{ order.cancelledBy === 'admin' ? 'the store' : 'the customer' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}
+                Cancelled by {{ order.cancelledBy === 'rider' ? 'the rider' : order.cancelledBy === 'user' ? 'the customer' : 'the store' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}
               </p>
             }
 

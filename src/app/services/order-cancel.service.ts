@@ -4,37 +4,33 @@ import { AlertController, ToastController } from '@ionic/angular';
 import { Order } from '../models/order.model';
 import { OrderService } from './order.service';
 
-const CUSTOMER_REASONS = [
-  'I changed my mind',
-  'I ordered by mistake',
-  'It is taking too long',
-  'I want to change my order',
-];
+export type CancelRole = 'admin' | 'rider';
 
-const STORE_REASONS = ['Item out of stock', 'Store is closing', 'Cannot deliver to this address', 'Customer request'];
+const REASONS: Record<CancelRole, string[]> = {
+  admin: ['Item out of stock', 'Store is closing', 'Cannot deliver to this address', 'Customer request'],
+  rider: ['Customer unreachable', 'Wrong or incomplete address', 'Customer refused the order', 'Cannot reach the address'],
+};
 
-/** The "Cancel order" question (with a reason) shared by the customer and admin screens. */
+/** The "Cancel order" question (with a reason) shared by the admin and rider screens. */
 @Injectable({ providedIn: 'root' })
 export class OrderCancelService {
   private readonly orders = inject(OrderService);
   private readonly alertController = inject(AlertController);
   private readonly toastController = inject(ToastController);
 
-  /** A customer may cancel only before the kitchen starts; the admin until it leaves the kitchen. */
-  canCancel(order: Order, asAdmin: boolean): boolean {
-    return asAdmin ? order.status === 'Placed' || order.status === 'Preparing' : order.status === 'Placed';
+  /** Customers cannot cancel. Admin: until it leaves the kitchen. Rider: while delivering it. */
+  canCancel(order: Order, role: CancelRole): boolean {
+    return role === 'admin'
+      ? order.status === 'Placed' || order.status === 'Preparing'
+      : order.status === 'Out for Delivery';
   }
 
   /** Asks for a reason, cancels, and tells the person what happened. Resolves true when cancelled. */
-  async ask(order: Order, asAdmin: boolean): Promise<boolean> {
-    const reasons = asAdmin ? STORE_REASONS : CUSTOMER_REASONS;
+  async ask(order: Order, role: CancelRole): Promise<boolean> {
+    const reasons = REASONS[role];
     const alert = await this.alertController.create({
       header: `Cancel order ${order.id}?`,
-      message: asAdmin
-        ? 'The customer will be told why. Stock goes back on the shelf.'
-        : order.payment === 'Cash on Delivery'
-          ? 'This cannot be undone.'
-          : 'This cannot be undone. Your payment will be refunded.',
+      message: 'The customer will be told why.',
       inputs: reasons.map((reason, index) => ({
         type: 'radio' as const,
         label: reason,
@@ -47,8 +43,8 @@ export class OrderCancelService {
       ],
     });
     await alert.present();
-    const { role, data } = await alert.onDidDismiss<{ values?: string }>();
-    if (role !== 'confirm') return false;
+    const { role: dismissRole, data } = await alert.onDidDismiss<{ values?: string }>();
+    if (dismissRole !== 'confirm') return false;
 
     const reason = typeof data?.values === 'string' ? data.values : reasons[0];
     const result = await this.orders.cancelOrder(order.id, reason);

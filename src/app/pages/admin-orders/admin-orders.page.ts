@@ -101,11 +101,11 @@ export class AdminOrdersPage {
   }
 
   canCancel(order: Order): boolean {
-    return this.cancelDialog.canCancel(order, true);
+    return this.cancelDialog.canCancel(order, 'admin');
   }
 
   async cancel(order: Order): Promise<void> {
-    await this.cancelDialog.ask(order, true);
+    await this.cancelDialog.ask(order, 'admin');
   }
 
   async setStatus(orderId: string, status: OrderStatus): Promise<void> {

@@ -7,6 +7,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { Order } from '../../models/order.model';
 import { PesoPipe } from '../../pipes/peso.pipe';
 import { AuthService } from '../../services/auth.service';
+import { OrderCancelService } from '../../services/order-cancel.service';
 import { OrderService } from '../../services/order.service';
 import { RiderService } from '../../services/rider.service';
 
@@ -28,6 +29,7 @@ export class RiderPage {
   private readonly orderService = inject(OrderService);
   private readonly toastController = inject(ToastController);
   private readonly alertController = inject(AlertController);
+  private readonly cancelDialog = inject(OrderCancelService);
   protected readonly auth = inject(AuthService);
   protected readonly rider = inject(RiderService);
 
@@ -121,6 +123,11 @@ export class RiderPage {
       ],
     });
     await alert.present();
+  }
+
+  /** A failed delivery (customer unreachable, wrong address...). Asks for a reason first. */
+  async cancel(order: Order): Promise<void> {
+    await this.cancelDialog.ask(order, 'rider');
   }
 
   private async toast(message: string): Promise<void> {

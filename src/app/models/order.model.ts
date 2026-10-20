@@ -51,9 +51,9 @@ export interface Order {
   pointsEarned: number;
   /** Reference number of the (simulated) GCash / card payment. Cash on Delivery has none. */
   paymentRef?: string;
-  /** Why the order was cancelled, and by whom ('user' or 'admin'). */
+  /** Why the order was cancelled, and by whom ('admin' or 'rider'; 'user' only on old orders). */
   cancelReason?: string;
-  cancelledBy?: 'user' | 'admin';
+  cancelledBy?: 'user' | 'admin' | 'rider';
   /** ISO date the payment went through. */
   paidAt?: string;
 }

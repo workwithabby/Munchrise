@@ -43,7 +43,7 @@
           </div>
 
           @if (order.status === 'Cancelled') {
-            <p class="row-item__meta">Cancelled{{ order.cancelledBy === 'admin' ? ' by the store' : '' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}</p>
+            <p class="row-item__meta">Cancelled{{ order.cancelledBy === 'admin' ? ' by the store' : order.cancelledBy === 'rider' ? ' by your rider' : '' }}{{ order.cancelReason ? ': ' + order.cancelReason : '' }}</p>
           } @else {
             <app-order-progress [status]="order.status" />
           }
@@ -66,9 +66,6 @@
                 <ion-icon slot="start" name="receipt-outline" aria-hidden="true"></ion-icon>
                 Receipt
               </ion-button>
-              @if (canCancel(order)) {
-                <ion-button size="small" fill="clear" color="danger" (click)="cancel(order)">Cancel</ion-button>
-              }
               @if (order.status === 'Delivered') {
                 <ion-button size="small" fill="outline" [routerLink]="['/review-order', order.id]">
                   <ion-icon slot="start" name="star-outline" aria-hidden="true"></ion-icon>

@@ -82,8 +82,9 @@ export class ProductsPage {
   private readonly applyParams = effect(() => {
     const q = this.q();
     const cat = this.category();
-    if (q) this.search.set(q);
-    if (cat && this.categories.includes(cat)) this.selectedCategory.set(cat);
+    // Always follow the link, so Home -> Menu with no params starts clean
+    this.search.set(q);
+    this.selectedCategory.set(cat && this.categories.includes(cat) ? cat : 'All');
   });
 
   readonly results = computed(() =>
@@ -183,6 +184,8 @@ export class ProductsPage {
   }
 
   clearFilters(): void {
+    this.search.set('');
+    this.selectedCategory.set('All');
     this.dietary.set([]);
     this.minRating.set(0);
     this.inStockOnly.set(false);

@@ -15,7 +15,6 @@ import {
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { ORDER_FLOW, OrderStatus } from '../../models/order.model';
 import { PesoPipe } from '../../pipes/peso.pipe';
-import { OrderCancelService } from '../../services/order-cancel.service';
 import { OrderService } from '../../services/order.service';
 
 interface Step {
@@ -87,7 +86,6 @@ export class OrderTrackingPage {
   readonly id = input<string>('');
 
   private readonly orders = inject(OrderService);
-  private readonly cancelDialog = inject(OrderCancelService);
 
   readonly steps = STEPS;
 
@@ -96,15 +94,6 @@ export class OrderTrackingPage {
   readonly stepIndex = computed(() => ORDER_FLOW.indexOf(this.status()));
   readonly delivered = computed(() => this.status() === 'Delivered');
   readonly cancelled = computed(() => this.status() === 'Cancelled');
-  readonly canCancel = computed(() => {
-    const o = this.order();
-    return !!o && this.cancelDialog.canCancel(o, false);
-  });
-
-  async cancel(): Promise<void> {
-    const o = this.order();
-    if (o) await this.cancelDialog.ask(o, false);
-  }
   readonly headline = computed(() => HEADLINE[this.status()]);
   readonly eta = computed(() => ETA[this.status()]);
   readonly riderPosition = computed(() => RIDER_POSITION[this.status()]);
